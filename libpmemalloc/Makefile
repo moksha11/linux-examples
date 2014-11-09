@@ -34,12 +34,18 @@
 
 TARGETS = libpmemalloc.a libpmemalloc.so pmemalloc_test1 pmemalloc_test2\
 	  pmemalloc_check
-INCS = -I..
+	  
+INCS = -I.. 
 OBJS = pmemalloc.o util.o icount.o
 LIBFILES = ../libpmem/libpmem.a libpmemalloc.a
 MAPFILE = pmemalloc.map
 SOVERSION = 1
-CFLAGS = -ggdb
+#CFLAGS = -ggdb #-D_DELAYFREE
+#CFLAGS=-D_DELAYFREE
+STATICLIBS=/usr/lib/libpmemlog.a
+LIBS=-lpmemlog -lpthread $(STATICLIBS)
+
+
 
 all: $(TARGETS)
 
@@ -55,19 +61,19 @@ libpmemalloc.so: $(OBJS)
 libpmemalloc.a libpmemalloc.so: CFLAGS += -fPIC
 
 pmemalloc_test1: pmemalloc_test1.o pmemalloc.h $(LIBFILES)
-	$(CC) -o $@ $(CFLAGS) $(INCS) pmemalloc_test1.c $(LIBFILES)
+	$(CC) -o $@ $(CFLAGS) $(INCS) pmemalloc_test1.c $(LIBFILES) $(LIBS)
 
-pmemalloc_test2: pmemalloc_test2.o pmemalloc.h $(LIBFILES)
-	$(CC) -o $@ $(CFLAGS) $(INCS) pmemalloc_test2.c $(LIBFILES)
+pmemalloc_test2: pmemalloc_test2.o pmemalloc.h $(LIBFILES) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $(INCS) pmemalloc_test2.c $(LIBFILES) $(LIBS)
 
-pmemalloc_check: pmemalloc_check.o pmemalloc.h $(LIBFILES)
-	$(CC) -o $@ $(CFLAGS) $(INCS) pmemalloc_check.c $(LIBFILES)
+pmemalloc_check: pmemalloc_check.o pmemalloc.h $(LIBFILES) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $(INCS) pmemalloc_check.c $(LIBFILES) $(LIBS)
 
 util.o: ../util/util.c ../util/util.h
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) -fPIC $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(LIBS) -fPIC $<
 
 icount.o: ../icount/icount.c ../icount/icount.h
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) -fPIC $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(LIBS) -fPIC $<
 
 ../libpmem/libpmem.a: force
 	$(MAKE) -C ../libpmem

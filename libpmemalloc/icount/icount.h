@@ -31,20 +31,9 @@
  */
 
 /*
- * pmem.h -- definitions of libpmem entry points
+ * icount.h -- interfaces for the icount module
  */
 
-#define _DATAPERSIST 10
-
-
-void pmem_msync_mode(void);	/* for testing on non-PM memory-mapped files */
-void pmem_fit_mode(void);	/* for fault injection testing */
-
-/* commonly-used functions for Persistent Memory */
-void *pmem_map(int fd, size_t len);
-void pmem_persist(void *addr, size_t len, int flags);
-
-/* for advanced users -- functions that do portions of pmem_persist() */
-void pmem_flush_cache(void *addr, size_t len, int flags);
-void pmem_fence(void);
-void pmem_drain_pm_stores(void);
+void icount_start(unsigned long life_remaining);
+void icount_stop(void);
+unsigned long icount_total(void);

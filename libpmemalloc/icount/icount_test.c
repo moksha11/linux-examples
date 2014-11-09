@@ -31,107 +31,50 @@
  */
 
 /*
- * util.c -- some simple utility routines
+ * icount_test.c -- test for icount module
  */
 
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/param.h>
+#include <sys/ptrace.h>
+#include <sys/user.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
-#include <dirent.h>
 
-#include "util.h"
+#include "util/util.h"
+#include "icount/icount.h"
 
-/*
- * debug -- printf-like debug messages
- */
-void
-debug(const char *file, int line, const char *func, const char *fmt, ...)
+int Debug = 1;
+
+int
+main(int argc, char *argv[])
 {
+	int i;
+	int sum;
+	unsigned long ttl = 0ul;
 
-#ifdef _DEBUG
-	va_list ap;
-	int save_errno;
+	if (argc == 2)
+		ttl = strtoul(argv[1], NULL, 10);
 
-	if (!Debug)
-		return;
+	/*
+	 * the code snippet under test (bracketed by calls
+	 * to icount_start/icount_stop).
+	 */
+	icount_start(ttl);
+	for (i = 0; i < 1; i++)
+		sum += i;
+	icount_stop();
 
-	save_errno = errno;
+	printf("Total instruction count: %lu\n", icount_total());
 
-	fprintf(stderr, "debug: %s:%d %s()", file, line, func);
-	if (fmt) {
-		fprintf(stderr, ": ");
-		va_start(ap, fmt);
-		vfprintf(stderr, fmt, ap);
-		va_end(ap);
-	}
-	fprintf(stderr, "\n");
-	errno = save_errno;
-#endif
-}
-
-/*
- * fatal -- printf-like error exits, with and without errno printing
- */
-void
-fatal(int err, const char *file, int line, const char *func,
-	const char *fmt, ...)
-{
-	va_list ap;
-
-	fprintf(stderr, "ERROR: %s:%d %s()", file, line, func);
-	if (fmt) {
-		fprintf(stderr, ": ");
-		va_start(ap, fmt);
-		vfprintf(stderr, fmt, ap);
-		va_end(ap);
-	}
-	if (err)
-		fprintf(stderr, ": %s", strerror(err));
-	fprintf(stderr, "\n");
-	exit(1);
-}
-
-/*
- * exename -- figure out the name used to run this program
- *
- * Internal -- used by usage().
- */
-static const char *
-exename(void)
-{
-	char proc[PATH_MAX];
-	static char exename[PATH_MAX];
-	int nbytes;
-
-	snprintf(proc, PATH_MAX, "/proc/%d/exe", getpid());
-	if ((nbytes = readlink(proc, exename, PATH_MAX)) < 0)
-		strcpy(exename, "Unknown");
-	else
-		exename[nbytes] = '\0';
-
-	return exename;
-}
-
-/*
- * usage -- printf-like usage message emitter
- */
-void
-usage(const char *argfmt, const char *fmt, ...)
-{
-	va_list ap;
-
-	fprintf(stderr, "Usage: %s", (Myname == NULL) ? exename() : Myname);
-	if (argfmt)
-		fprintf(stderr, " %s", argfmt);
-	if (fmt) {
-		fprintf(stderr, ": ");
-		va_start(ap, fmt);
-		vfprintf(stderr, fmt, ap);
-		va_end(ap);
-	}
-	fprintf(stderr, "\n");
-	exit(1);
+	exit(0);
 }

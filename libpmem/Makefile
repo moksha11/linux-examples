@@ -37,21 +37,24 @@ INCS = -I..
 OBJS = pmem.o pmem_cl.o pmem_fit.o pmem_msync.o util.o
 MAPFILE = pmem.map
 SOVERSION = 1
-CFLAGS = -ggdb
+#CFLAGS = -ggdb -D_DONTPERSIST
+CFLAGS = -D_ENABL_DATAPERSIST #-D_DONTPERSIST
+STATICDEP=/usr/lib/libpmemlog.a
+DEP=-lpmemlog $(STATICDEP)
 
 all: $(TARGETS)
 
 libpmem.a: $(OBJS)
-	$(AR) rv $@ $(OBJS)
+	$(AR) rv $@ $(OBJS) $(STATICDEP)
 
 libpmem.so: $(OBJS)
-	$(CC) $(CFLAGS) -shared -Wl,--version-script=$(MAPFILE),-soname,$(SONAME).$(SOVERSION) -o $@ $(OBJS)
+	$(CC) $(CFLAGS) -shared -Wl,--version-script=$(MAPFILE),-soname,$(SONAME).$(SOVERSION) -o $@ $(OBJS) $(DEP)
 
 .c.o:
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) -fPIC $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(DEP) -fPIC $<
 
 util.o: ../util/util.c ../util/util.h
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) -fPIC $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(DEP) -fPIC $<
 
 clean:
 	$(RM) *.o core a.out

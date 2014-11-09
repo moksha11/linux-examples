@@ -40,17 +40,24 @@
  * doing.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdint.h>
-
 #include "util/util.h"
+#include <libpmemlog.h>
+
+#define _DATAPERSIST 10
 
 #define	ALIGN 64	/* assumes 64B cache line size */
 
 static int PM_fd;
 static uintptr_t PM_base;
+
+
 
 /*
  * pmem_map -- map the Persistent Memory
@@ -68,7 +75,6 @@ pmem_map_fit(int fd, size_t len)
 
 	PM_base = (uintptr_t)base;
 	PM_fd = dup(fd);
-
 	return base;
 }
 
@@ -98,6 +104,13 @@ pmem_flush_cache_fit(void *addr, size_t len, int flags)
 	if (!PM_base)
 		FATAL("pmem_map hasn't been called");
 
+#ifdef _NOPERSIST
+    return;
+#elif _NODATAPERSIST
+     if(flags == _DATAPERSIST)
+     return;
+#endif
+
 	/*
 	 * even though pwrite() can take any random byte addresses and
 	 * lengths, we simulate cache flushing by writing the full 64B
@@ -118,6 +131,13 @@ pmem_flush_cache_fit(void *addr, size_t len, int flags)
 void
 pmem_persist_fit(void *addr, size_t len, int flags)
 {
+#ifdef _NOPERSIST
+	return;
+#elif _NODATAPERSIST
+	 if(flags == _DATAPERSIST)
+     return;
+#endif
+
 	pmem_flush_cache_fit(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores_fit();

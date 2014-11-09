@@ -83,6 +83,13 @@ pmem_drain_pm_stores(void)
 static inline void
 pmem_flush_cache(void *addr, size_t len, int flags)
 {
+
+#ifdef _NOPERSIST
+    return;
+#elif _NODATAPERSIST
+     if(flags == _DATAPERSIST)
+     return;
+#endif
 	uintptr_t uptr;
 	
 	/* loop through 64B-aligned chunks covering the given range */
@@ -94,6 +101,13 @@ pmem_flush_cache(void *addr, size_t len, int flags)
 static inline void
 pmem_persist(void *addr, size_t len, int flags)
 {
+
+#ifdef _NOPERSIST
+    return;
+#elif _NODATAPERSIST
+     if(flags == _DATAPERSIST)
+     return;
+#endif
 	pmem_flush_cache(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores();

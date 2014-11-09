@@ -108,7 +108,7 @@ pmemalloc_recover(void *pmp)
 	struct clump *clp;
 	int i;
 
-	DEBUG("pmp=0x%lx", pmp);
+	//DEBUG("pmp=0x%lx", pmp);
 
 	clp = PMEM(pmp, (struct clump *)PMEM_CLUMP_OFFSET);
 
@@ -116,8 +116,8 @@ pmemalloc_recover(void *pmp)
 		size_t sz = clp->size & ~PMEM_STATE_MASK;
 		int state = clp->size & PMEM_STATE_MASK;
 
-		DEBUG("[0x%lx]clump size %lx state %d",
-				OFF(pmp, clp), sz, state);
+		//DEBUG("[0x%lx]clump size %lx state %d",
+		//		OFF(pmp, clp), sz, state);
 
 		switch (state) {
 		case PMEM_STATE_RESERVED:
@@ -167,7 +167,7 @@ pmemalloc_recover(void *pmp)
 		}
 
 		clp = (struct clump *)((uintptr_t)clp + sz);
-		DEBUG("next clp %lx, offset 0x%lx", clp, OFF(pmp, clp));
+		//DEBUG("next clp %lx, offset 0x%lx", clp, OFF(pmp, clp));
 	}
 }
 
@@ -189,7 +189,7 @@ pmemalloc_coalesce_free(void *pmp)
 	struct clump *lastfree;
 	size_t csize;
 
-	DEBUG("pmp=0x%lx", pmp);
+	//DEBUG("pmp=0x%lx", pmp);
 
 	firstfree = lastfree = NULL;
 	csize = 0;
@@ -199,8 +199,8 @@ pmemalloc_coalesce_free(void *pmp)
 		size_t sz = clp->size & ~PMEM_STATE_MASK;
 		int state = clp->size & PMEM_STATE_MASK;
 
-		DEBUG("[0x%lx]clump size %lx state %d",
-				OFF(pmp, clp), sz, state);
+		//DEBUG("[0x%lx]clump size %lx state %d",
+		//		OFF(pmp, clp), sz, state);
 
 		if (state == PMEM_STATE_FREE) {
 			if (firstfree == NULL)
@@ -209,7 +209,7 @@ pmemalloc_coalesce_free(void *pmp)
 				lastfree = clp;
 			csize += sz;
 		} else if (firstfree != NULL && lastfree != NULL) {
-			DEBUG("coalesced size 0x%lx", csize);
+			//DEBUG("coalesced size 0x%lx", csize);
 			firstfree->size = csize | PMEM_STATE_FREE;
 			pmem_persist(firstfree, sizeof(*firstfree), 0);
 			firstfree = lastfree = NULL;
@@ -220,12 +220,12 @@ pmemalloc_coalesce_free(void *pmp)
 		}
 
 		clp = (struct clump *)((uintptr_t)clp + sz);
-		DEBUG("next clp %lx, offset 0x%lx", clp, OFF(pmp, clp));
+		//DEBUG("next clp %lx, offset 0x%lx", clp, OFF(pmp, clp));
 	}
 	if (firstfree != NULL && lastfree != NULL) {
-		DEBUG("coalesced size 0x%lx", csize);
-		DEBUG("firstfree 0x%lx next clp after firstfree will be 0x%lx",
-				firstfree, (uintptr_t)firstfree + csize);
+		//DEBUG("coalesced size 0x%lx", csize);
+		//DEBUG("firstfree 0x%lx next clp after firstfree will be 0x%lx",
+		//		firstfree, (uintptr_t)firstfree + csize);
 		firstfree->size = csize | PMEM_STATE_FREE;
 		pmem_persist(firstfree, sizeof(*firstfree), 0);
 	}
@@ -264,7 +264,7 @@ pmemalloc_init(const char *path, size_t size)
 	int fd = -1;
 	struct stat stbuf;
 
-	DEBUG("path=%s size=0x%lx", path, size);
+	//DEBUG("path=%s size=0x%lx", path, size);
 
 	if (stat(path, &stbuf) < 0) {
 		struct clump cl = { 0 };
@@ -278,8 +278,8 @@ pmemalloc_init(const char *path, size_t size)
 		 * file didn't exist, we're creating a new memory pool
 		 */
 		if (size < PMEM_MIN_POOL_SIZE) {
-			DEBUG("size %lu too small (must be at least %lu)",
-					size, PMEM_MIN_POOL_SIZE);
+			//DEBUG("size %lu too small (must be at least %lu)",
+			//		size, PMEM_MIN_POOL_SIZE);
 			errno = EINVAL;
 			goto out;
 		}
@@ -309,8 +309,8 @@ pmemalloc_init(const char *path, size_t size)
 		cl.size = lastclumpoff - PMEM_CLUMP_OFFSET;
 		if (pwrite(fd, &cl, sizeof(cl), PMEM_CLUMP_OFFSET) < 0)
 			goto out;
-		DEBUG("[0x%lx] created clump, size 0x%lx",
-				PMEM_CLUMP_OFFSET, cl.size);
+		//DEBUG("[0x%lx] created clump, size 0x%lx",
+				//PMEM_CLUMP_OFFSET, cl.size);
 
 		/*
 		 * write the pool header
@@ -348,7 +348,7 @@ pmemalloc_init(const char *path, size_t size)
 	pmemalloc_recover(pmp);
 	pmemalloc_coalesce_free(pmp);
 
-	DEBUG("return pmp 0x%lx", pmp);
+	//DEBUG("return pmp 0x%lx", pmp);
 	return pmp;
 
 out:
@@ -377,7 +377,7 @@ out:
 void *
 pmemalloc_static_area(void *pmp)
 {
-	DEBUG("pmp=0x%lx", pmp);
+	//DEBUG("pmp=0x%lx", pmp);
 
 	return PMEM(pmp, (void *)PMEM_STATIC_OFFSET);
 }
@@ -424,7 +424,7 @@ pmemalloc_reserve(void *pmp, size_t size)
 	size_t nsize = roundup(size + PMEM_CHUNK_SIZE, PMEM_CHUNK_SIZE);
 	struct clump *clp;
 
-	DEBUG("pmp=0x%lx, size=0x%lx -> 0x%lx", pmp, size, nsize);
+	//DEBUG("pmp=0x%lx, size=0x%lx -> 0x%lx", pmp, size, nsize);
 
 	clp = PMEM(pmp, (struct clump *)PMEM_CLUMP_OFFSET);
 
@@ -436,8 +436,8 @@ pmemalloc_reserve(void *pmp, size_t size)
 		size_t sz = clp->size & ~PMEM_STATE_MASK;
 		int state = clp->size & PMEM_STATE_MASK;
 
-		DEBUG("[0x%lx] clump size 0x%lx state %d",
-				OFF(pmp, clp), sz, state);
+		//DEBUG("[0x%lx] clump size 0x%lx state %d",
+		//		OFF(pmp, clp), sz, state);
 
 		if (state == PMEM_STATE_FREE && nsize <= sz) {
 			void *ptr = (void *)
@@ -445,8 +445,8 @@ pmemalloc_reserve(void *pmp, size_t size)
 				(uintptr_t)pmp;
 			size_t leftover = sz - nsize;
 
-			DEBUG("fit found ptr 0x%lx, leftover 0x%lx bytes",
-					ptr, leftover);
+			//DEBUG("fit found ptr 0x%lx, leftover 0x%lx bytes",
+			//		ptr, leftover);
 			if (leftover >= PMEM_CHUNK_SIZE * 2) {
 				struct clump *newclp;
 				int i;
@@ -454,8 +454,8 @@ pmemalloc_reserve(void *pmp, size_t size)
 				newclp = (struct clump *)
 					((uintptr_t)clp + nsize);
 
-				DEBUG("splitting: [0x%lx] new clump",
-						OFF(pmp, newclp));
+				//DEBUG("splitting: [0x%lx] new clump",
+				//		OFF(pmp, newclp));
 				/*
 				 * can go ahead and start fiddling with
 				 * this freely since it is in the middle
@@ -481,7 +481,7 @@ pmemalloc_reserve(void *pmp, size_t size)
 			} else {
 				int i;
 
-				DEBUG("no split required");
+				//DEBUG("no split required");
 
 				for (i = 0; i < PMEM_NUM_ON; i++) {
 					clp->on[i].off = 0;
@@ -496,10 +496,10 @@ pmemalloc_reserve(void *pmp, size_t size)
 		}
 
 		clp = (struct clump *)((uintptr_t)clp + sz);
-		DEBUG("[0x%lx] next clump", OFF(pmp, clp));
+		//DEBUG("[0x%lx] next clump", OFF(pmp, clp));
 	}
 
-	DEBUG("no free memory of size %lu available", nsize);
+	//DEBUG("no free memory of size %lu available", nsize);
 	errno = ENOMEM;
 	return NULL;
 }
@@ -520,22 +520,22 @@ pmemalloc_onactive(void *pmp, void *ptr_, void **parentp_, void *nptr_)
 	struct clump *clp;
 	int i;
 
-	DEBUG("pmp=0x%lx, ptr_=0x%lx, parentp_=0x%lx, nptr_=0x%lx",
-			pmp, ptr_, parentp_, nptr_);
+	//DEBUG("pmp=0x%lx, ptr_=0x%lx, parentp_=0x%lx, nptr_=0x%lx",
+	//		pmp, ptr_, parentp_, nptr_);
 
 	clp = PMEM(pmp, (struct clump *)((uintptr_t)ptr_ - PMEM_CHUNK_SIZE));
 
 	ASSERTeq(clp->size & PMEM_STATE_MASK, PMEM_STATE_RESERVED);
 
-	DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
-			OFF(pmp, clp),
-			clp->on[0].off, clp->on[0].ptr_,
-			clp->on[1].off, clp->on[1].ptr_,
-			clp->on[2].off, clp->on[2].ptr_);
+	//DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
+	//		OFF(pmp, clp),
+	//		clp->on[0].off, clp->on[0].ptr_,
+	//		clp->on[1].off, clp->on[1].ptr_,
+	//		clp->on[2].off, clp->on[2].ptr_);
 
 	for (i = 0; i < PMEM_NUM_ON; i++)
 		if (clp->on[i].off == 0) {
-			DEBUG("using on[%d], off 0x%lx", i, OFF(pmp, parentp_));
+			//DEBUG("using on[%d], off 0x%lx", i, OFF(pmp, parentp_));
 			/*
 			 * order here is important:
 			 * 1. set ptr_
@@ -569,22 +569,22 @@ pmemalloc_onfree(void *pmp, void *ptr_, void **parentp_, void *nptr_)
 	struct clump *clp;
 	int i;
 
-	DEBUG("pmp=0x%lx, ptr_=0x%lx, parentp_=0x%lx, nptr_=0x%lx",
-			pmp, ptr_, parentp_, nptr_);
+	//DEBUG("pmp=0x%lx, ptr_=0x%lx, parentp_=0x%lx, nptr_=0x%lx",
+	//		pmp, ptr_, parentp_, nptr_);
 
 	clp = PMEM(pmp, (struct clump *)((uintptr_t)ptr_ - PMEM_CHUNK_SIZE));
 
 	ASSERTeq(clp->size & PMEM_STATE_MASK, PMEM_STATE_ACTIVE);
 
-	DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
-			OFF(pmp, clp),
-			clp->on[0].off, clp->on[0].ptr_,
-			clp->on[1].off, clp->on[1].ptr_,
-			clp->on[2].off, clp->on[2].ptr_);
+	//DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
+	//		OFF(pmp, clp),
+	//		clp->on[0].off, clp->on[0].ptr_,
+	//		clp->on[1].off, clp->on[1].ptr_,
+	//		clp->on[2].off, clp->on[2].ptr_);
 
 	for (i = 0; i < PMEM_NUM_ON; i++)
 		if (clp->on[i].off == 0) {
-			DEBUG("using on[%d], off 0x%lx", i, OFF(pmp, parentp_));
+			//DEBUG("using on[%d], off 0x%lx", i, OFF(pmp, parentp_));
 			/*
 			 * order here is important:
 			 * 1. set ptr_
@@ -598,7 +598,6 @@ pmemalloc_onfree(void *pmp, void *ptr_, void **parentp_, void *nptr_)
 			pmem_persist(clp, sizeof(*clp), 0);
 			return;
 		}
-
 	FATAL("exceeded onfree limit (%d)", PMEM_NUM_ON);
 }
 
@@ -617,17 +616,17 @@ pmemalloc_activate(void *pmp, void *ptr_)
 	size_t sz;
 	int i;
 
-	DEBUG("pmp=%lx, ptr_=%lx", pmp, ptr_);
+	//DEBUG("pmp=%lx, ptr_=%lx", pmp, ptr_);
 
 	clp = PMEM(pmp, (struct clump *)((uintptr_t)ptr_ - PMEM_CHUNK_SIZE));
 
 	ASSERTeq(clp->size & PMEM_STATE_MASK, PMEM_STATE_RESERVED);
 
-	DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
-			OFF(pmp, clp),
-			clp->on[0].off, clp->on[0].ptr_,
-			clp->on[1].off, clp->on[1].ptr_,
-			clp->on[2].off, clp->on[2].ptr_);
+	//DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
+	//		OFF(pmp, clp),
+	//		clp->on[0].off, clp->on[0].ptr_,
+	//		clp->on[1].off, clp->on[1].ptr_,
+	//		clp->on[2].off, clp->on[2].ptr_);
 
 	sz = clp->size & ~PMEM_STATE_MASK;
 
@@ -675,16 +674,16 @@ pmemalloc_free(void *pmp, void *ptr_)
 	int state;
 	int i;
 
-	DEBUG("pmp=%lx, ptr_=%lx", pmp, ptr_);
+	//DEBUG("pmp=%lx, ptr_=%lx", pmp, ptr_);
 
 	clp = PMEM(pmp, (struct clump *)((uintptr_t)ptr_ - PMEM_CHUNK_SIZE));
 
 
-	DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
-			OFF(pmp, clp),
-			clp->on[0].off, clp->on[0].ptr_,
-			clp->on[1].off, clp->on[1].ptr_,
-			clp->on[2].off, clp->on[2].ptr_);
+	//DEBUG("[0x%lx] clump on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
+	//		OFF(pmp, clp),
+	//		clp->on[0].off, clp->on[0].ptr_,
+	//		clp->on[1].off, clp->on[1].ptr_,
+	//		clp->on[2].off, clp->on[2].ptr_);
 
 	sz = clp->size & ~PMEM_STATE_MASK;
 	state = clp->size & PMEM_STATE_MASK;
@@ -775,7 +774,7 @@ void pmemalloc_check(const char *path)
 	};
 	int i;
 
-	DEBUG("path=%s", path);
+	//DEBUG("path=%s", path);
 
 	if ((fd = open(path, O_RDONLY)) < 0)
 		FATALSYS("%s", path);
@@ -783,7 +782,7 @@ void pmemalloc_check(const char *path)
 	if (fstat(fd, &stbuf) < 0)
 		FATALSYS("fstat");
 
-	DEBUG("file size 0x%lx", stbuf.st_size);
+	//DEBUG("file size 0x%lx", stbuf.st_size);
 
 	if (stbuf.st_size < PMEM_MIN_POOL_SIZE)
 		FATAL("size %lu too small (must be at least %lu)",
@@ -792,16 +791,16 @@ void pmemalloc_check(const char *path)
 	if ((pmp = mmap(NULL, stbuf.st_size, PROT_READ, MAP_SHARED,
 					fd, 0)) == MAP_FAILED)
 		FATALSYS("mmap");
-	DEBUG("pmp %lx", pmp);
+	//DEBUG("pmp %lx", pmp);
 
 	close(fd);
 
 	hdrp = PMEM(pmp, (struct pool_header *)PMEM_HDR_OFFSET);
-	DEBUG("   hdrp 0x%lx (off 0x%lx)", hdrp, OFF(pmp, hdrp));
+	//DEBUG("   hdrp 0x%lx (off 0x%lx)", hdrp, OFF(pmp, hdrp));
 
 	if (strcmp(hdrp->signature, PMEM_SIGNATURE))
 		FATAL("failed signature check");
-	DEBUG("signature check passed");
+	//DEBUG("signature check passed");
 
 	clp = PMEM(pmp, (struct clump *)PMEM_CLUMP_OFFSET);
 	/*
@@ -812,12 +811,12 @@ void pmemalloc_check(const char *path)
 	 */
 	lastclp = PMEM(pmp, (struct clump *)
 		(stbuf.st_size & ~(PMEM_CHUNK_SIZE - 1)) - PMEM_CHUNK_SIZE);
-	DEBUG("    clp 0x%lx (off 0x%lx)", clp, OFF(pmp, clp));
-	DEBUG("lastclp 0x%lx (off 0x%lx)", lastclp, OFF(pmp, lastclp));
+	//DEBUG("    clp 0x%lx (off 0x%lx)", clp, OFF(pmp, clp));
+	//DEBUG("lastclp 0x%lx (off 0x%lx)", lastclp, OFF(pmp, lastclp));
 
 	clumptotal = (uintptr_t)lastclp - (uintptr_t)clp;
 
-	DEBUG("expected clumptotal: %lu", clumptotal);
+	//DEBUG("expected clumptotal: %lu", clumptotal);
 
 	/*
 	 * check that:
@@ -831,7 +830,7 @@ void pmemalloc_check(const char *path)
 	if (PMEM_CLUMP_OFFSET + clumptotal + 
 		(stbuf.st_size & (PMEM_CHUNK_SIZE - 1)) + PMEM_CHUNK_SIZE
 		== stbuf.st_size) {
-		DEBUG("section sizes correctly add up to file size");
+		//DEBUG("section sizes correctly add up to file size");
 	} else {
 		FATAL("CLUMP_OFFSET %d + clumptotal %lu + rounded %d + "
 				"CHUNK_SIZE %d = %lu, (not st_size %lu)",
@@ -851,12 +850,12 @@ void pmemalloc_check(const char *path)
 		size_t sz = clp->size & ~PMEM_STATE_MASK;
 		int state = clp->size & PMEM_STATE_MASK;
 
-		DEBUG("[%u]clump size 0x%lx state %d",
-				OFF(pmp, clp), sz, state);
-		DEBUG("on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
-			clp->on[0].off, clp->on[0].ptr_,
-			clp->on[1].off, clp->on[1].ptr_,
-			clp->on[2].off, clp->on[2].ptr_);
+		//DEBUG("[%u]clump size 0x%lx state %d",
+		//		OFF(pmp, clp), sz, state);
+		//DEBUG("on: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx",
+		//	clp->on[0].off, clp->on[0].ptr_,
+		//	clp->on[1].off, clp->on[1].ptr_,
+		//	clp->on[2].off, clp->on[2].ptr_);
 
 		if (sz > stats[PMEM_STATE_UNUSED].largest)
 			stats[PMEM_STATE_UNUSED].largest = sz;
@@ -868,29 +867,29 @@ void pmemalloc_check(const char *path)
 
 		switch (state) {
 		case PMEM_STATE_FREE:
-			DEBUG("clump state: free");
+			//DEBUG("clump state: free");
 			ASSERTeq(clp->on[0].off, 0);
 			ASSERTeq(clp->on[1].off, 0);
 			ASSERTeq(clp->on[2].off, 0);
 			break;
 
 		case PMEM_STATE_RESERVED:
-			DEBUG("clump state: reserved");
+			//DEBUG("clump state: reserved");
 			break;
 
 		case PMEM_STATE_ACTIVATING:
-			DEBUG("clump state: activating");
+			//DEBUG("clump state: activating");
 			break;
 
 		case PMEM_STATE_ACTIVE:
-			DEBUG("clump state: active");
+			//DEBUG("clump state: active");
 			ASSERTeq(clp->on[0].off, 0);
 			ASSERTeq(clp->on[1].off, 0);
 			ASSERTeq(clp->on[2].off, 0);
 			break;
 
 		case PMEM_STATE_FREEING:
-			DEBUG("clump state: freeing");
+			//DEBUG("clump state: freeing");
 			break;
 
 		default:
@@ -906,7 +905,7 @@ void pmemalloc_check(const char *path)
 		stats[state].count++;
 
 		clp = (struct clump *)((uintptr_t)clp + sz);
-		DEBUG("next clp 0x%lx, offset 0x%lx", clp, OFF(pmp, clp));
+		//DEBUG("next clp 0x%lx, offset 0x%lx", clp, OFF(pmp, clp));
 	}
 
 	if (clp == lastclp)

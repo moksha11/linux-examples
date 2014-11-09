@@ -37,27 +37,30 @@
 # Makefiles.
 #
 INCS = -I..
-CFLAGS = -ggdb -Wall -Werror
+#CFLAGS = -ggdb -Wall -Werror #-D_DELAYFREE
+CFLAGS = -Wall -Werror -D_ENABL_DATAPERSIST #-D_DELAYFRE
+STATICLIBS=/usr/lib/libpmemlog.a
+LIBS=-lpmemlog -lpthread $(STATICLIBS)
 
 all: $(TARGETS)
 
 $(TARGETS): $(OBJS) $(LIBFILES)
-	$(CC) -o $@ $(CFLAGS) $^ $(LIBFILES) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $^ $(LIBFILES) $(LIBS) $(STATICLIBS)
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(INCS) $< -o $@
+	$(CC) -c $(CFLAGS) $(INCS) $(LIBS) $< -o $@
 
 util.o: ../util/util.c ../util/util.h
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(LIBS) $<
 
 icount.o: ../icount/icount.c ../icount/icount.h
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) $<
+	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(LIBS) $<
 
 ../libpmem/libpmem.a: force
 	$(MAKE) -C ../libpmem
 
 ../libpmemalloc/libpmemalloc.a: force
-	$(MAKE) -C ../libpmemalloc
+	$(MAKE) -C ../libpmemalloc $(LIBS)
 
 clean:
 	$(RM) *.o core a.out testfile*

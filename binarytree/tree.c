@@ -45,6 +45,7 @@
 #include "libpmem/pmem.h"
 #include "libpmemalloc/pmemalloc.h"
 #include "tree.h"
+#include <libpmemlog.h>
 
 /*
  * the Persistent Memory pool, as returned by pmemalloc_init()
@@ -79,7 +80,7 @@ struct static_info {
 void
 tree_init(const char *path, size_t size)
 {
-	DEBUG("path \"%s\" size %lu", path, size);
+	//DEBUG("path \"%s\" size %lu", path, size);
 
 	if ((Pmp = pmemalloc_init(path, size)) == NULL)
 		FATALSYS("pmemalloc_init on %s", path);
@@ -95,7 +96,7 @@ tree_insert_subtree(struct tnode **rootp_, const char *s)
 {
 	int diff;
 
-	DEBUG("*rootp_ = %lx", (uintptr_t)*rootp_);
+	//DEBUG("*rootp_ = %lx", (uintptr_t)*rootp_);
 
 	if (*rootp_ == NULL) {
 		/* insert a new node here */
@@ -114,13 +115,17 @@ tree_insert_subtree(struct tnode **rootp_, const char *s)
 		pmemalloc_onactive(Pmp, tnp_, (void **)rootp_, tnp_);
 		pmemalloc_activate(Pmp, tnp_);
 
-		DEBUG("new node inserted, count=1");
+		//DEBUG("new node inserted, count=1");
 	} else if ((diff = strcmp(s, PMEM(Pmp, *rootp_)->s)) == 0) {
 		/* already in tree, increase count */
 		PMEM(Pmp, *rootp_)->count++;
+#ifdef _NODATAPERSIST
+		pmem_persist(&PMEM(Pmp, *rootp_)->count, sizeof(unsigned),_DATAPERSIST);
+#else
 		pmem_persist(&PMEM(Pmp, *rootp_)->count, sizeof(unsigned), 0);
+#endif
 
-		DEBUG("new count=%u", PMEM(Pmp, *rootp_)->count);
+		//DEBUG("new count=%u", PMEM(Pmp, *rootp_)->count);
 	} else if (diff < 0) {
 		/* recurse left */
 		tree_insert_subtree(&PMEM(Pmp, *rootp_)->left_, s);
@@ -149,16 +154,16 @@ tree_insert(const char *s)
 static void
 tree_walk_subtree(struct tnode *root_)
 {
-	DEBUG("root_ = %lx", (uintptr_t)root_);
+	//DEBUG("root_ = %lx", (uintptr_t)root_);
 
 	if (root_) {
 		/* recurse left */
 		tree_walk_subtree(PMEM(Pmp, root_)->left_);
 
 		/* print this node */
-		printf("%5d %s\n",
-				PMEM(Pmp, root_)->count,
-				PMEM(Pmp, root_)->s);
+		//printf("%5d %s\n",
+			//	PMEM(Pmp, root_)->count,
+				//PMEM(Pmp, root_)->s);
 
 		/* recurse right */
 		tree_walk_subtree(PMEM(Pmp, root_)->right_);
@@ -184,7 +189,7 @@ tree_walk(void)
 static void
 tree_free_subtree(struct tnode **rootp_)
 {
-	DEBUG("*rootp_ = %lx", (uintptr_t)*rootp_);
+	//DEBUG("*rootp_ = %lx", (uintptr_t)*rootp_);
 
 	if (*rootp_ != NULL) {
 		/* recurse left */

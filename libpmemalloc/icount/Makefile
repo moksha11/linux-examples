@@ -29,45 +29,27 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Makefile for binarytree example
+# Makefile for icount module
 #
-TARGETS = tree_insert tree_walk tree_free tree_wordfreq
-OBJS = tree.o util.o icount.o
-LIBFILES = ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a
-CLOBBERFILES = 4000.txt 4300.txt 4302.txt 4309.txt 4500.txt\
-	       4000.zip 4300.zip 4302.zip 4309.zip 4500.zip
-CFLAGS = -D_ENABL_DATAPERSIST #-D_DELAYFREE
+TARGETS = icount_test
+OBJS = icount_test.o icount.o util.o
 
 include ../Makefile.inc
 
-tree_insert: tree_insert.o
-tree_walk: tree_walk.o
-tree_free : tree_free.o
-tree_wordfreq : tree_wordfreq.o
-
-tree.c: tree.h
-
 #
-# The allcounts entry point runs pmem_basic_icount via the allcounts
+# The allcounts entry point runs icount_test via the allcounts
 # script, which will simulate a crash between every two adjacent
-# instructions in the test code snippet in pmem_basic_icount.c.
+# instructions in the test code snippet in icount_test.c.
 # The allcount script will then summarize the results of all the runs.
 #
-# This takes a while to run.
-#
-CMD = rm -f testfile%C; ./tree_insert -F -i %C testfile%C one two three four; ../libpmemalloc/pmemalloc_check testfile%C; ./tree_walk testfile%C; ../libpmemalloc/pmemalloc_check testfile%C; rm -f testfile%C
+CMD = ./icount_test %C
 
-allcounts: tree_insert ../libpmemalloc/pmemalloc_check tree_walk
-	@../icount/allcounts -j 200 '$(CMD)'
-	@rm -f testfile*
+allcounts: icount_test
+	@./allcounts -j 100 '$(CMD)'
 
-../libpmemalloc/pmemalloc_check:
-	$(MAKE) -C ../libpmemalloc
-
-test: tree_walk tree_wordfreq freqtest
-	@./freqtest -n
-	@./freqtest 2>&1 | tee freqtest.out
-	@cmp -s freqtest.out freqtest.pass || (echo FAIL: freqtest.out does not match freqtest.pass; false)
+test: icount_test
+	@./icount_test 4 2>&1 | tee icount_test.out
+	@cmp -s icount_test.out icount_test.pass || (echo FAIL: icount_test.out does not match icount_test.pass; false)
 	@echo PASS
 
 .PHONY: allcounts test

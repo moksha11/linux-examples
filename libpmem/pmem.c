@@ -94,6 +94,8 @@ pmem_fit_mode(void)
 void *
 pmem_map(int fd, size_t len)
 {
+
+
 	return (*Map[Mode])(fd, len);
 }
 
@@ -103,6 +105,14 @@ pmem_map(int fd, size_t len)
 void
 pmem_persist(void *addr, size_t len, int flags)
 {
+
+#ifdef _NOPERSIST
+    return;
+#elif _NODATAPERSIST
+     if(flags == _DATAPERSIST){
+     	return;
+     }	
+#endif
 	(*Persist[Mode])(addr, len, flags);
 }
 
@@ -112,6 +122,12 @@ pmem_persist(void *addr, size_t len, int flags)
 void
 pmem_flush_cache(void *addr, size_t len, int flags)
 {
+#ifdef _NOPERSIST
+    return;
+#elif _NODATAPERSIST
+     if(flags == _DATAPERSIST)
+     return;
+#endif
 	(*Flush[Mode])(addr, len, flags);
 }
 
@@ -121,6 +137,9 @@ pmem_flush_cache(void *addr, size_t len, int flags)
 void
 pmem_fence(void)
 {
+#ifdef _NOPERSIST
+    return;
+#endif
 	__builtin_ia32_sfence();
 }
 
@@ -130,5 +149,8 @@ pmem_fence(void)
 void
 pmem_drain_pm_stores(void)
 {
+#ifdef _NOPERSIST
+	return;
+#endif
 	(*Drain_pm_stores[Mode])();
 }
