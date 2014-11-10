@@ -41,29 +41,35 @@ void
 pmem_init(const char *path, size_t size)
 {
 	//DEBUG("path \"%s\" size %lu", path, size);
-
+#ifdef INTEL_PMEM
 	if ((Pmp = pmemalloc_init(path, size)) == NULL)
 		printf("pmemalloc_init on %s\n", path);
 
 	root = pmemalloc_static_area(Pmp);
+#endif
 }
 
 
-void *pmemalloc_reserv_virtual(size_t size, void **tmp){
-
+inline void *pmemalloc_reserv_virtual(size_t size, void **tmp){
+#ifdef INTEL_PMEM
 	void *ptr = pmemalloc_reserve(Pmp, size);
 	*tmp = ptr;
 	return PMEM(Pmp, ptr);
+#else
+	return malloc(size);
+#endif
 }
 
-void *pmemalloc_activate_local(void *ptr){
-
+inline void *pmemalloc_activate_local(void *ptr){
+#ifdef INTEL_PMEM
 	pmemalloc_onactive(Pmp, ptr,root, ptr);
 	pmemalloc_activate(Pmp, ptr);
-
+#else
+	
+#endif
 }
 
-void *pmemalloc_free_local(void *ptr){
+inline void *pmemalloc_free_local(void *ptr){
 
 	pmemalloc_free(Pmp, ptr);
 }
@@ -79,7 +85,7 @@ create_hashtable(unsigned int minsize,
 	unsigned int pindex, size = primes[0];
 	void *tmp, *tmp1;
 
-	pmem_init("/mnt/pmfs/nvmfile", 1024*1024*1024);
+	pmem_init("/mnt/pmfs/nvmfile", 1024*1024*512);
 
 	/* Check requested hashtable isn't too large */
 	if (minsize > (1u << 30)) return NULL;
@@ -100,10 +106,8 @@ create_hashtable(unsigned int minsize,
 #else
 	h->table = (struct entry **)malloc(sizeof(struct entry*) * size);
 #endif
-
-
 	//if (NULL == h->table) { free(h); return NULL; } /*oom*/
-	//memset(h->table, 0, size * sizeof(struct entry *));
+	memset(h->table, 0, size * sizeof(struct entry *));
 	h->tablelength  = size;
 	h->primeindex   = pindex;
 	h->entrycount   = 0;
@@ -235,7 +239,7 @@ hashtable_insert(struct hashtable *h, void *k, void *v)
 #ifdef INTEL_PMEM
 	e = (struct entry *)pmemalloc_reserv_virtual(sizeof(struct entry), &tmp);
 #else
-	e = (struct entry *)malloc(sizeof(struct entry));
+	e = (struct entry *)calloc(sizeof(struct entry), 1);
 #endif
 	if (NULL == e) { --(h->entrycount); return 0; } /*oom*/
 	e->h = hash(h,k);

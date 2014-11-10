@@ -55,7 +55,7 @@
 
 #define	ALIGN 64	/* assumes 64B cache line size */
 
-#define ENABLE_LOG
+//#define ENABLE_LOG
 PMEMlogpool *g_plp;
 
 #ifdef ENABLE_LOG

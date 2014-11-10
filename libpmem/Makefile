@@ -38,7 +38,7 @@ OBJS = pmem.o pmem_cl.o pmem_fit.o pmem_msync.o util.o
 MAPFILE = pmem.map
 SOVERSION = 1
 #CFLAGS = -ggdb -D_DONTPERSIST
-CFLAGS = -D_ENABL_DATAPERSIST #-D_DONTPERSIST
+CFLAGS = -ggdb -D_ENABL_DATAPERSIST #-D_DONTPERSIST
 STATICDEP=/usr/lib/libpmemlog.a
 DEP=-lpmemlog $(STATICDEP)
 

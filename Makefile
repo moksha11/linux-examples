@@ -43,6 +43,7 @@ SUBDIRS = basic\
 	  libpmem\
 	  libpmemalloc\
 	  trivial\
+	  c-hashtable\
 	  util
 
 all	: TARGET = all

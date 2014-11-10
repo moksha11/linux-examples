@@ -418,6 +418,8 @@ pmemalloc_static_area(void *pmp)
  * happens before parent->next_ is set to point at the new memory will
  * result in the memory being returned back to the free list.
  */
+struct clump *gclp;
+
 void *
 pmemalloc_reserve(void *pmp, size_t size)
 {
@@ -426,16 +428,27 @@ pmemalloc_reserve(void *pmp, size_t size)
 
 	//DEBUG("pmp=0x%lx, size=0x%lx -> 0x%lx", pmp, size, nsize);
 
-	clp = PMEM(pmp, (struct clump *)PMEM_CLUMP_OFFSET);
-
+	if(!gclp) {
+		clp = PMEM(pmp, (struct clump *)PMEM_CLUMP_OFFSET);
+	}else {
+		clp = gclp;
+	}
+	//printf("pmp=0x%lx, size=0x%lx -> 0x%lx\n", pmp, size, nsize);
 	if (clp->size == 0)
 		FATAL("no clumps found");
+#if 0
+	printf("clp->size %u \n",clp->size);
+	void *ptr = (void *)(uintptr_t)clp + PMEM_CHUNK_SIZE -
+				(uintptr_t)pmp;
+	clp->size = nsize | PMEM_STATE_RESERVED;
+	clp = (struct clump *)((uintptr_t)clp + clp->size);
+	return ptr;
+#endif
 
 	/* first fit */
 	while (clp->size) {
 		size_t sz = clp->size & ~PMEM_STATE_MASK;
 		int state = clp->size & PMEM_STATE_MASK;
-
 		//DEBUG("[0x%lx] clump size 0x%lx state %d",
 		//		OFF(pmp, clp), sz, state);
 
@@ -478,7 +491,8 @@ pmemalloc_reserve(void *pmp, size_t size)
 				pmem_persist(clp, sizeof(*clp), 0);
 				clp->size = nsize | PMEM_STATE_RESERVED;
 				pmem_persist(clp, sizeof(*clp), 0);
-			} else {
+			}
+			else { 
 				int i;
 
 				//DEBUG("no split required");
@@ -491,10 +505,9 @@ pmemalloc_reserve(void *pmp, size_t size)
 				clp->size = sz | PMEM_STATE_RESERVED;
 				pmem_persist(clp, sizeof(*clp), 0);
 			}
-
+			gclp = clp;
 			return ptr;
 		}
-
 		clp = (struct clump *)((uintptr_t)clp + sz);
 		//DEBUG("[0x%lx] next clump", OFF(pmp, clp));
 	}
