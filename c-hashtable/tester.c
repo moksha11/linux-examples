@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <string.h> /* for memcmp */
 #include "tester.h"
-#include "nv_map.h"
-#include "c_io.h"
+//#include "nv_map.h"
+//#include "c_io.h"
 
 
 //#define INTEL_PMEM
