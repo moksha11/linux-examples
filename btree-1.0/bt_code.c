@@ -68,6 +68,9 @@ pmem_init(const char *path, size_t size)
 #endif
 }
 
+inline void *get_PMEM(void *ptr) {
+	printf("PMEM[ptr] %u \n",PMEM(Pmp, ptr));
+}
 
 inline void *pmemalloc_reserv_virtual(size_t size, void **tmp){
 #ifdef INTEL_PMEM
@@ -90,7 +93,7 @@ inline void *pmemalloc_activate_local(void *ptr){
 
 void pmemalloc_free_local(void *ptr){
 
-	//pmemalloc_free(Pmp, ptr);
+	pmemalloc_free(Pmp, ptr);
 }
 #endif
 
@@ -114,6 +117,7 @@ inline void * persist_memmove ( void * destination, const void * source, size_t 
 inline FREE(void *ptr){
 
 #ifdef INTEL_PMEM
+	printf("deleting \n");
 	pmemalloc_free_local(ptr);
 #else
 	free(ptr);
