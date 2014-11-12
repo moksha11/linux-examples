@@ -8,6 +8,20 @@
 #include <string.h>
 #include <assert.h>
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/param.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <stdarg.h>
+
+#define INTEL_PMEM
+
+
 void printtimevaldiff(struct timeval a, struct timeval b);
 int intcmp(void *a, void *b);
 
@@ -48,7 +62,7 @@ intcmp(void *a, void *b)
 	if (x == y)
 		return 0;
 	/*if (x > y)*/
-		return 1;
+	return 1;
 }
 
 void
@@ -122,10 +136,29 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
+#if 0
+	int fd=-1, errorno;
+	if ((fd = open("/mnt/pmfs/nvmfile", O_CREAT|O_RDWR, 0666)) < 0)
+		return -1;
+
+	if ((posix_fallocate(fd, 0, 512*1024*1024)) != 0)
+	{
+		perror("errno");
+		return -1;
+	}
+#endif
 	t = atoi(argv[1]);
-	nums = malloc(sizeof *nums * t);
+
+
 	bt = bt_create(intcmp, 4096);
 	bt_dumptree(bt);
+//#ifdef INTEL_PMEM
+	//void *tmp;
+	//nums =pmemalloc_reserv_virtual(sizeof *nums * t, &tmp);
+	//pmemalloc_activate_local(tmp);
+//#else
+	nums = malloc(sizeof *nums * t);
+//#endif
 
 	for (i = 0; i < t; i++) {
 		if (i == 1)
@@ -136,7 +169,7 @@ main(int argc, char **argv)
 		bt_insert(bt, nums[i]);
 		if (!bt_checktree(bt, 0x0, 0xffffffff)) {
 			printf("tree isn't in order after insert!!, at %d:%p\n",
-			    i, nums[i]);
+					i, nums[i]);
 			/*bt_dumptree(bt);*/
 			exit(1);
 		}
@@ -146,7 +179,7 @@ main(int argc, char **argv)
 	for (i = 0; i < t; i++)
 		if ((tnum = bt_find(bt, nums[i])) != nums[i]) {
 			printf("can't find node %d, found %d instead.\n",
-			    nums[i], tnum);
+					nums[i], tnum);
 			exit(1);
 		}
 	printf("done searching, now deleting...\n");

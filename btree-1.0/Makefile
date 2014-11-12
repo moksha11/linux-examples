@@ -20,9 +20,9 @@ TESTOBJS = main.o
 
 MAN3 = btree.3
 
-DEBUG = -ggdb
+DEBUG = -g #gdb
 #OPT = -O2 # -DNO_INLINE
-PROFILE = -pg
+#PROFILE = -pg
 LIBOPTS = -DSTATS  #-DSAFE_BTREE 
 LIBFILES = ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
 srcdir = .

@@ -46,14 +46,81 @@
 #include "libpmemalloc/pmemalloc.h"
 #include <libpmemlog.h>
 
-#define INTEL_PMEM
-
-
 
 //#define _USE_NVMALLOC
 
 
-#define	FREE(p) ((void *) NULL)	//(free(p), (void *) NULL)
+#define INTEL_PMEM
+
+#ifdef INTEL_PMEM
+
+static void *Pmp;
+void **root;
+void
+pmem_init(const char *path, size_t size)
+{
+	//DEBUG("path \"%s\" size %lu", path, size);
+#ifdef INTEL_PMEM
+	if ((Pmp = pmemalloc_init(path, size)) == NULL)
+		printf("pmemalloc_init on %s\n", path);
+
+	root = pmemalloc_static_area(Pmp);
+#endif
+}
+
+
+inline void *pmemalloc_reserv_virtual(size_t size, void **tmp){
+#ifdef INTEL_PMEM
+	void *ptr = pmemalloc_reserve(Pmp, size);
+	*tmp = ptr;
+	return PMEM(Pmp, ptr);
+#else
+	return malloc(size);
+#endif
+}
+
+inline void *pmemalloc_activate_local(void *ptr){
+#ifdef INTEL_PMEM
+	pmemalloc_onactive(Pmp, ptr,root, ptr);
+	pmemalloc_activate(Pmp, ptr);
+#else
+
+#endif
+}
+
+void pmemalloc_free_local(void *ptr){
+
+	//pmemalloc_free(Pmp, ptr);
+}
+#endif
+
+
+inline void * persist_memmove ( void * destination, const void * source, size_t num )
+{
+
+  void *ptr = memmove (destination, source, num );
+
+#ifdef INTEL_PMEM
+
+#ifdef _NODATAPERSIST
+		pmem_persist(destination, num,_DATAPERSIST);
+#else
+		pmem_persist(destination, num,0);
+#endif
+#endif
+  return ptr;
+}
+
+inline FREE(void *ptr){
+
+#ifdef INTEL_PMEM
+	pmemalloc_free_local(ptr);
+#else
+	free(ptr);
+#endif
+
+}
+
 
 #ifdef NO_INLINE
 #define inline
@@ -204,47 +271,7 @@ findkindex(struct btree *btr, struct btreenode *x, bt_data_t k, int *r)
 }
 #endif
 
-#ifdef INTEL_PMEM
 
-static void *Pmp;
-void **root;
-void
-pmem_init(const char *path, size_t size)
-{
-	//DEBUG("path \"%s\" size %lu", path, size);
-#ifdef INTEL_PMEM
-	if ((Pmp = pmemalloc_init(path, size)) == NULL)
-		printf("pmemalloc_init on %s\n", path);
-
-	root = pmemalloc_static_area(Pmp);
-#endif
-}
-
-
-inline void *pmemalloc_reserv_virtual(size_t size, void **tmp){
-#ifdef INTEL_PMEM
-	void *ptr = pmemalloc_reserve(Pmp, size);
-	*tmp = ptr;
-	return PMEM(Pmp, ptr);
-#else
-	return malloc(size);
-#endif
-}
-
-inline void *pmemalloc_activate_local(void *ptr){
-#ifdef INTEL_PMEM
-	pmemalloc_onactive(Pmp, ptr,root, ptr);
-	pmemalloc_activate(Pmp, ptr);
-#else
-
-#endif
-}
-
-inline void *pmemalloc_free_local(void *ptr){
-
-	pmemalloc_free(Pmp, ptr);
-}
-#endif
 
 
 #ifdef INTEL_PMEM
@@ -356,8 +383,8 @@ bt_create(bt_cmp_t cmp, int size)
 	int textra;
 
 #ifdef INTEL_PMEM
-	void *tmp;
-	pmem_init("/mnt/pmfs/nvmfile", 1024*1024*512);
+	void *tmp, *tmp1;
+	pmem_init("/mnt/pmfs/testfile", 1024*1024*512);
 #endif
 
 	textra = 0;
@@ -395,7 +422,7 @@ bt_create(bt_cmp_t cmp, int size)
 #endif
 
 #ifdef INTEL_PMEM
-		if ((btr->root = allocbtreenode(textra, &tmp)) == NULL)
+		if ((btr->root = allocbtreenode(textra, &tmp1)) == NULL)
 				btr = FREE(btr);
 #else
 		if ((btr->root = allocbtreenode(textra)) == NULL)
@@ -403,6 +430,11 @@ bt_create(bt_cmp_t cmp, int size)
 #endif
 		}
 	}
+#ifdef INTEL_PMEM
+	pmemalloc_activate_local(tmp1);
+	pmemalloc_activate_local(tmp);
+#endif
+
 	return btr;
 }
 
@@ -451,6 +483,11 @@ btreesplitchild(struct btree *btr, struct btreenode *x, int i,
 		KEYS(btr, x)[j + 1] = KEYS(btr, x)[j];
 	KEYS(btr, x)[i] = KEYS(btr, y)[btr->t - 1];
 	x->n++;
+
+#ifdef INTEL_PMEM
+	pmemalloc_activate_local(tmp);
+#endif
+
 }
 
 void
@@ -479,13 +516,18 @@ bt_insert(struct btree *btr, bt_data_t k)
 #else
 		if ((s = allocbtreenode(btr->textra)) == NULL)
 #endif
-			exit(1);
+		exit(1);
+
 		btr->root = s;
 		s->leaf = 0;
 		s->n = 0;
 		NODES(btr, s)[0] = r;
 		btreesplitchild(btr, s, 0, r);
 		r = s;
+#ifdef INTEL_PMEM
+	pmemalloc_activate_local(tmp);
+#endif
+
 	}
 	/* finally insert the new node */
 	btreeinsertnonfull(btr, r, k);
@@ -501,7 +543,7 @@ btreeinsertnonfull(struct btree *btr, struct btreenode *x, bt_data_t k)
 		/* we are a leaf, just add it in */
 		i = findkindex(btr, x, k, NULL);
 		if (i != x->n - 1)
-			memmove(KEYS(btr, x) + i + 2, KEYS(btr, x) + i + 1,
+			persist_memmove(KEYS(btr, x) + i + 2, KEYS(btr, x) + i + 1,
 			    (x->n - i - 1) * sizeof k);
 		KEYS(btr, x)[i + 1] = k;
 		x->n++;
@@ -595,7 +637,7 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 		if (s == 2)
 			i++;
 		kp = KEYS(btr, x)[i];
-		memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
+		persist_memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
 		    (x->n - i - 1) * sizeof k);
 		x->n--;
 		return kp;
@@ -649,15 +691,15 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			y = NODES(btr, x)[i];
 			z = NODES(btr, x)[i + 1];
 			KEYS(btr, y)[y->n++] = k;
-			memmove(KEYS(btr, y) + y->n, KEYS(btr, z),
+			persist_memmove(KEYS(btr, y) + y->n, KEYS(btr, z),
 			    z->n * sizeof k);
-			memmove(NODES(btr, y) + y->n, NODES(btr, z),
+			persist_memmove(NODES(btr, y) + y->n, NODES(btr, z),
 			    (z->n + 1) * sizeof y);
 			y->n += z->n;
 
-			memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
+			persist_memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
 			    (x->n - i - 1) * sizeof k);
-			memmove(NODES(btr, x) + i + 1, NODES(btr, x) + i + 2,
+			persist_memmove(NODES(btr, x) + i + 1, NODES(btr, x) + i + 2,
 			    (x->n - i - 1) * sizeof k);
 			x->n--;
 			z = freebtreenode(z);
@@ -685,15 +727,17 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 		 */
 		if (i > 0 && (y = NODES(btr, x)[i - 1])->n >= btr->t) {
 			/* left sibling has t keys */
-			memmove(KEYS(btr, xp) + 1, KEYS(btr, xp),
+			persist_memmove(KEYS(btr, xp) + 1, KEYS(btr, xp),
 			    xp->n * sizeof k);
-			memmove(NODES(btr, xp) + 1, NODES(btr, xp),
+			persist_memmove(NODES(btr, xp) + 1, NODES(btr, xp),
 			    (xp->n + 1) * sizeof x);
 			KEYS(btr, xp)[0] = KEYS(btr, x)[i - 1];
 			KEYS(btr, x)[i - 1] = KEYS(btr, y)[y->n - 1];
 			NODES(btr, xp)[0] = NODES(btr, y)[y->n];
 			y->n--;
 			xp->n++;
+
+
 		} else if (i < x->n &&
 		    (y = NODES(btr, x)[i + 1])->n >= btr->t) {
 			/* right sibling has t keys */
@@ -701,9 +745,9 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			KEYS(btr, x)[i] = KEYS(btr, y)[0];
 			NODES(btr, xp)[xp->n] = NODES(btr, y)[0];
 			y->n--;
-			memmove(KEYS(btr, y), KEYS(btr, y) + 1,
+			persist_memmove(KEYS(btr, y), KEYS(btr, y) + 1,
 			    y->n * sizeof k);
-			memmove(NODES(btr, y), NODES(btr, y) + 1,
+			persist_memmove(NODES(btr, y), NODES(btr, y) + 1,
 			    (y->n + 1) * sizeof x);
 		}
 		/*
@@ -717,14 +761,14 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 		    (y = NODES(btr, x)[i - 1])->n == btr->t - 1) {
 			/* merge i with left sibling */
 			KEYS(btr, y)[y->n++] = KEYS(btr, x)[i - 1];
-			memmove(KEYS(btr, y) + y->n, KEYS(btr, xp),
+			persist_memmove(KEYS(btr, y) + y->n, KEYS(btr, xp),
 			    xp->n * sizeof k);
-			memmove(NODES(btr, y) + y->n, NODES(btr, xp),
+			persist_memmove(NODES(btr, y) + y->n, NODES(btr, xp),
 			    (xp->n + 1) * sizeof x);
 			y->n += xp->n;
-			memmove(KEYS(btr, x) + i - 1, KEYS(btr, x) + i,
+			persist_memmove(KEYS(btr, x) + i - 1, KEYS(btr, x) + i,
 			    (x->n - i) * sizeof k);
-			memmove(NODES(btr, x) + i, NODES(btr, x) + i + 1,
+			persist_memmove(NODES(btr, x) + i, NODES(btr, x) + i + 1,
 			    (x->n - i) * sizeof x);
 			x->n--;
 			FREE(xp);
@@ -733,14 +777,14 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 		    btr->t - 1) {
 			/* merge i with right sibling */
 			KEYS(btr, xp)[xp->n++] = KEYS(btr, x)[i];
-			memmove(KEYS(btr, xp) + xp->n, KEYS(btr, y),
+			persist_memmove(KEYS(btr, xp) + xp->n, KEYS(btr, y),
 			    y->n * sizeof k);
-			memmove(NODES(btr, xp) + xp->n, NODES(btr, y),
+			persist_memmove(NODES(btr, xp) + xp->n, NODES(btr, y),
 			    (y->n + 1) * sizeof x);
 			xp->n += y->n;
-			memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
+			persist_memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
 			    (x->n - i - 1) * sizeof k);
-			memmove(NODES(btr, x) + i + 1, NODES(btr, x) + i + 2,
+			persist_memmove(NODES(btr, x) + i + 1, NODES(btr, x) + i + 2,
 			    (x->n - i - 1) * sizeof x);
 			x->n--;
 			FREE(y);
