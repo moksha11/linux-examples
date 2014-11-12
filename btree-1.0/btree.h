@@ -30,6 +30,8 @@
 #ifndef _BTREE_H_
 #define _BTREE_H_
 
+#include <stddef.h>
+
 struct btree;
 
 #define	BT_SIZEDEF	128
@@ -46,5 +48,18 @@ int bt_checktree(struct btree *, bt_data_t min, bt_data_t max);
 void *bt_max(struct btree *);
 void *bt_min(struct btree *);
 void *bt_find(struct btree *, bt_data_t);
+
+//pmem_init(const char *path, size_t size);
+inline void *get_PMEM(void *ptr);
+inline void *pmemalloc_reserv_virtual(size_t size, void **tmp);
+inline void *pmemalloc_activate_local(void *ptr);
+
+
+
+
+
+
+
+
 
 #endif /* _BTREE_H_ */
