@@ -48,8 +48,6 @@
 
 
 //#define _USE_NVMALLOC
-
-
 #define INTEL_PMEM
 
 #ifdef INTEL_PMEM
@@ -92,10 +90,14 @@ inline void *pmemalloc_activate_local(void *ptr){
 }
 
 void pmemalloc_free_local(void *ptr){
-
+	//printf("freeing \n");
 	pmemalloc_free(Pmp, ptr);
 }
 #endif
+
+inline void pmem_persist_local(void *src, size_t len, int flags){
+	pmem_persist(src, len,_DATAPERSIST);
+}
 
 
 inline void * persist_memmove ( void * destination, const void * source, size_t num )
@@ -106,9 +108,9 @@ inline void * persist_memmove ( void * destination, const void * source, size_t 
 #ifdef INTEL_PMEM
 
 #ifdef _NODATAPERSIST
-		pmem_persist(destination, num,_DATAPERSIST);
+		pmem_persist_local(destination, num,_DATAPERSIST);
 #else
-		pmem_persist(destination, num,0);
+		pmem_persist_local(destination, num,_DATAPERSIST);
 #endif
 #endif
   return ptr;
@@ -117,9 +119,10 @@ inline void * persist_memmove ( void * destination, const void * source, size_t 
 inline FREE(void *ptr){
 
 #ifdef INTEL_PMEM
-	printf("deleting \n");
+	//printf("deleting \n");
 	pmemalloc_free_local(ptr);
 #else
+	//printf("deleting \n");
 	free(ptr);
 #endif
 
@@ -407,6 +410,7 @@ bt_create(bt_cmp_t cmp, int size)
 
 #ifdef INTEL_PMEM
 		if ((btr = allocbtree_intel(&tmp)) != NULL)
+			btr->p_ptr = tmp;
 #else
 		if ((btr = allocbtree()) != NULL)
 #endif
@@ -426,8 +430,12 @@ bt_create(bt_cmp_t cmp, int size)
 #endif
 
 #ifdef INTEL_PMEM
-		if ((btr->root = allocbtreenode(textra, &tmp1)) == NULL)
-				btr = FREE(btr);
+		if ((btr->root = allocbtreenode(textra, &tmp1)) == NULL) {
+				btr = FREE(btr->p_ptr);
+		}
+		else {
+			btr->root->p_ptr = tmp1;
+		}
 #else
 		if ((btr->root = allocbtreenode(textra)) == NULL)
 				btr = FREE(btr);
@@ -455,11 +463,16 @@ btreesplitchild(struct btree *btr, struct btreenode *x, int i,
 
 #ifdef INTEL_PMEM
 	void *tmp;
-	if ((z = allocbtreenode(btr->textra,&tmp)) == NULL)
+	if ((z = allocbtreenode(btr->textra,&tmp)) == NULL){
+		exit(1);
+	}
+	else {
+		z->p_ptr= tmp;
+	}
 #else
 	if ((z = allocbtreenode(btr->textra)) == NULL)
-#endif
 		exit(1);
+#endif
 
 	/* duplicate leaf setting, and store number of nodes */
 	z->leaf = y->leaf;
@@ -487,8 +500,8 @@ btreesplitchild(struct btree *btr, struct btreenode *x, int i,
 		KEYS(btr, x)[j + 1] = KEYS(btr, x)[j];
 	KEYS(btr, x)[i] = KEYS(btr, y)[btr->t - 1];
 	x->n++;
-
 #ifdef INTEL_PMEM
+	pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
 	pmemalloc_activate_local(tmp);
 #endif
 
@@ -517,10 +530,12 @@ bt_insert(struct btree *btr, bt_data_t k)
 #ifdef INTEL_PMEM
 		void *tmp;
 		if ((s = allocbtreenode(btr->textra, &tmp)) == NULL)
+			exit(1);
+		s->p_ptr = tmp;
 #else
 		if ((s = allocbtreenode(btr->textra)) == NULL)
+			exit(1);
 #endif
-		exit(1);
 
 		btr->root = s;
 		s->leaf = 0;
@@ -551,6 +566,8 @@ btreeinsertnonfull(struct btree *btr, struct btreenode *x, bt_data_t k)
 			    (x->n - i - 1) * sizeof k);
 		KEYS(btr, x)[i + 1] = k;
 		x->n++;
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+
 	} else {
 		i = findkindex(btr, x, k, NULL) + 1;
 
@@ -582,7 +599,12 @@ bt_delete(struct btree *btr, bt_data_t k)
 #endif
 		x = btr->root;
 		btr->root = NODES(btr, x)[0];
+#ifdef INTEL_PMEM
+		//if(x->p_ptr)
+		FREE(x->p_ptr);
+#else
 		FREE(x);
+#endif
 	}
 	return r;
 }
@@ -644,6 +666,9 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 		persist_memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
 		    (x->n - i - 1) * sizeof k);
 		x->n--;
+#ifdef INTEL_PMEM
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+#endif
 		return kp;
 	}
 
@@ -667,6 +692,9 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			xp = NODES(btr, x)[i];
 			kp = KEYS(btr, x)[i];
 			KEYS(btr, x)[i] = nodedeletekey(btr, xp, NULL, 1);
+#ifdef INTEL_PMEM
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+#endif
 			return kp;
 		}
 		if ((zn = NODES(btr, x)[i + 1]->n) >= btr->t) {
@@ -682,6 +710,9 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			xp = NODES(btr, x)[i + 1];
 			kp = KEYS(btr, x)[i];
 			KEYS(btr, x)[i] = nodedeletekey(btr, xp, NULL, 2);
+#ifdef INTEL_PMEM
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+#endif
 			return kp;
 		}
 		if (yn == btr->t - 1 && zn == btr->t - 1) {
@@ -701,11 +732,18 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			    (z->n + 1) * sizeof y);
 			y->n += z->n;
 
+#ifdef INTEL_PMEM
+		pmem_persist_local(y, sizeof(struct btreenode),_DATAPERSIST);
+#endif
+
 			persist_memmove(KEYS(btr, x) + i, KEYS(btr, x) + i + 1,
 			    (x->n - i - 1) * sizeof k);
 			persist_memmove(NODES(btr, x) + i + 1, NODES(btr, x) + i + 2,
 			    (x->n - i - 1) * sizeof k);
 			x->n--;
+#ifdef INTEL_PMEM
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+#endif
 			z = freebtreenode(z);
 			return nodedeletekey(btr, y, k, s);
 		}
@@ -740,6 +778,10 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			NODES(btr, xp)[0] = NODES(btr, y)[y->n];
 			y->n--;
 			xp->n++;
+#ifdef INTEL_PMEM
+		pmem_persist_local(y, sizeof(struct btreenode),_DATAPERSIST);
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+#endif
 
 
 		} else if (i < x->n &&
@@ -753,6 +795,10 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			    y->n * sizeof k);
 			persist_memmove(NODES(btr, y), NODES(btr, y) + 1,
 			    (y->n + 1) * sizeof x);
+#ifdef INTEL_PMEM
+		pmem_persist_local(y, sizeof(struct btreenode),_DATAPERSIST);
+		pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+#endif
 		}
 		/*
 		 * Case 3b
@@ -775,7 +821,15 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			persist_memmove(NODES(btr, x) + i, NODES(btr, x) + i + 1,
 			    (x->n - i) * sizeof x);
 			x->n--;
-			FREE(xp);
+
+#ifdef INTEL_PMEM
+			pmem_persist_local(y, sizeof(struct btreenode),_DATAPERSIST);
+			pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+			//if(xp->p_ptr)
+				FREE(xp->p_ptr);
+#else
+				FREE(xp);
+#endif
 			xp = y;
 		} else if (i < x->n && (y = NODES(btr, x)[i + 1])->n ==
 		    btr->t - 1) {
@@ -791,7 +845,17 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 			persist_memmove(NODES(btr, x) + i + 1, NODES(btr, x) + i + 2,
 			    (x->n - i - 1) * sizeof x);
 			x->n--;
-			FREE(y);
+
+#ifdef INTEL_PMEM
+			pmem_persist_local(y, sizeof(struct btreenode),_DATAPERSIST);
+			pmem_persist_local(x, sizeof(struct btreenode),_DATAPERSIST);
+
+			//if(y->p_ptr)
+				FREE(y->p_ptr);
+#else
+				FREE(y);
+#endif
+
 		}
 	}
 	return nodedeletekey(btr, xp, k, s);
@@ -800,7 +864,12 @@ nodedeletekey(struct btree *btr, struct btreenode *x, bt_data_t k, int s)
 static struct btreenode *
 freebtreenode(struct btreenode *x)
 {
-	return FREE(x);
+#ifdef INTEL_PMEM
+	//if(x->p_ptr)
+		return FREE(x->p_ptr);
+#else
+		return FREE(x);
+#endif
 }
 
 bt_data_t
