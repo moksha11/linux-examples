@@ -1,0 +1,9 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:529: checking how to run the C preprocessor
+configure:609: checking for ANSI C header files
+configure:716: checking for sys/time.h
+configure:754: checking for working const
+configure:829: checking for inline
+configure:869: checking whether time.h and sys/time.h may both be included
