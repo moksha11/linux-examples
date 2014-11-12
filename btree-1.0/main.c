@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+
 #define INTEL_PMEM
 
 
@@ -152,13 +153,14 @@ main(int argc, char **argv)
 
 	bt = bt_create(intcmp, 4096);
 	bt_dumptree(bt);
-//#ifdef INTEL_PMEM
-	//void *tmp;
-	//nums =pmemalloc_reserv_virtual(sizeof *nums * t, &tmp);
-	//pmemalloc_activate_local(tmp);
-//#else
+#ifdef INTEL_PMEM
+	void *tmp;
+	nums =pmemalloc_reserv_virtual(sizeof *nums * t, &tmp);
+	//get_PMEM(nums);	
+	pmemalloc_activate_local(tmp);
+#else
 	nums = malloc(sizeof *nums * t);
-//#endif
+#endif
 
 	for (i = 0; i < t; i++) {
 		if (i == 1)
