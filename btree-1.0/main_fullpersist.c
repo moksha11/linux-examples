@@ -150,19 +150,14 @@ main(int argc, char **argv)
 #endif
 	t = atoi(argv[1]);
 
-	bt = bt_create(intcmp, 128);
-	if(!bt) {
-		perror("failed bt_create");
-		return -1;
-	}
 
+	bt = bt_create(intcmp, 4096);
 	bt_dumptree(bt);
 #ifdef INTEL_PMEM
 	void *tmp;
 	nums =pmemalloc_reserv_virtual(sizeof *nums * t, &tmp);
 	//get_PMEM(nums);	
 	pmemalloc_activate_local(tmp);
-	//nums = malloc(sizeof *nums * t);
 #else
 	nums = malloc(sizeof *nums * t);
 #endif
@@ -172,7 +167,6 @@ main(int argc, char **argv)
 			puts("gcc suck rocks!");
 		do
 			nums[i] = random();
-
 		while (checkdup(nums, i, nums[i]));
 		bt_insert(bt, nums[i]);
 		if (!bt_checktree(bt, 0x0, 0xffffffff)) {
@@ -183,15 +177,13 @@ main(int argc, char **argv)
 		}
 	}
 	printf("done inserting, now searching...\n");
-	//bt_dumptree(bt);
-#if 0
+	/*bt_dumptree(bt);*/
 	for (i = 0; i < t; i++)
 		if ((tnum = bt_find(bt, nums[i])) != nums[i]) {
 			printf("can't find node %d, found %d instead.\n",
 					nums[i], tnum);
 			exit(1);
 		}
-#endif
 	printf("done searching, now deleting...\n");
 	/*bt_dumptree(bt);*/
 	for (i = 0; i < t; i++) {
@@ -208,7 +200,7 @@ main(int argc, char **argv)
 		}*/
 		/*bt_dumptree(bt);*/
 	}
-	//bt_dumptree(bt);
+	bt_dumptree(bt);
 #endif
 	exit(0);
 }

@@ -1,5 +1,5 @@
 /*-
- * Copyright 1997-1999, 2001 John-Mark Gurney.
+ * Copyright 1997, 1998, 2001 John-Mark Gurney.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,38 +23,34 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	$Id: btreepriv.h,v 1.4.2.1 2001/03/28 06:17:12 jmg Exp $
+ *	$Id: btree.h,v 1.4.2.1 2001/03/28 06:17:12 jmg Exp $
  *
  */
 
-#ifndef _BTREEPRIV_H_
-#define _BTREEPRIV_H_
+#ifndef _BTREE_H_
+#define _BTREE_H_
 
-#include <btree.h>
+#include <stddef.h>
 
-struct btree {
-	struct	btreenode *root;
-	bt_cmp_t	cmp;
-	int	keyoff;
-	int	nodeptroff;
-	int	nkeys;
-	int	t;
-	int	nbits;
-	int	textra;
-	void *p_ptr;
-#ifdef STATS
-	int	numkeys;
-	int	numnodes;
-#endif STATS
-};
+struct btree;
 
-struct btreenode {
-	int	leaf	: 1;
-	int	n	: 15;
-	void *p_ptr;
-};
+#define	BT_SIZEDEF	128
 
-#define	KEYS(btr, x)	((void **)((char *)x + btr->keyoff))
-#define NODES(btr, x)	((struct btreenode **)((char *)x + btr->nodeptroff))
+typedef void *bt_data_t;
+typedef int (*bt_cmp_t)(bt_data_t, bt_data_t);
 
-#endif /* _BTREEPRIV_H_ */
+struct btree *bt_create(bt_cmp_t , int nodesize);
+void bt_insert(struct btree *, bt_data_t);
+void bt_dumptree(struct btree *);
+void bt_treestats(struct btree *);
+void *bt_delete(struct btree *, bt_data_t);
+int bt_checktree(struct btree *, bt_data_t min, bt_data_t max);
+void *bt_max(struct btree *);
+void *bt_min(struct btree *);
+void *bt_find(struct btree *, bt_data_t);
+
+inline void *pmemalloc_reserv_virtual(size_t size, void **tmp);
+inline void pmemalloc_activate_local(void *ptr);
+
+
+#endif /* _BTREE_H_ */

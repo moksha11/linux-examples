@@ -6,6 +6,8 @@ SHELL = /bin/sh
 
 LIB = btree
 
+#include ../Makefile.inc
+
 SRCS = bt_code.c bt_output.c
 OBJS = bt_code.o bt_output.o
 SOBJS = bt_code.so bt_output.so
@@ -20,10 +22,11 @@ TESTOBJS = main.o
 
 MAN3 = btree.3
 
-DEBUG = -g #gdb
-#OPT = -O2 # -DNO_INLINE
-#PROFILE = -pg
-LIBOPTS = -DSTATS  #-DSAFE_BTREE 
+#DEBUG = -g #gdb
+OPT = -O2 # -DNO_INLINE
+PROFILE = #-pg
+LIBOPTS = -D_NODATAPERSIST -D_ENABLE_LOG #-DSAFE_BTREE -DSTATS
+CPPFLAGS=-D_NODATAPERSIST -D_ENABLE_LOG
 LIBFILES = ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
 srcdir = .
 
