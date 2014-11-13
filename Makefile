@@ -38,10 +38,10 @@
 # Use "make clobber" to delete everything re-buildable (binaries, etc.).
 #
 SUBDIRS = basic\
-	  binarytree\
-	  icount\
 	  libpmem\
 	  libpmemalloc\
+	  binarytree\
+	  icount\
 	  trivial\
 	  c-hashtable\
 	  util
