@@ -4,14 +4,15 @@ GNUFLAG :=  -std=gnu99
 
 include ../Makefile.inc
 
-INCLUDE= ../ $(NVMALLOC_HOME)
+INCLUDE= ../ #$(NVMALLOC_HOME)
 DEFINES := -DMALLOC_PRODUCTION -lstdc++
 CFLAGS := -g -Wall -pipe -fvisibility=hidden \
       -funroll-loops  -Wno-implicit -Wno-uninitialized \
       -Wno-unused-but-set-variable \
-      -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC
+      -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC \
+      -D_ENABLE_LOG -D_NODATAPERSIST 	
 LIBFILES = ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread
-LIBS= -L$(NVMALLOC_HOME) -lpthread $(LIBFILES) #-lnvmchkpt
+LIBS=  -lpthread $(LIBFILES) #-lnvmchkpt
 
 
 

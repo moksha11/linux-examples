@@ -6,11 +6,8 @@
 #include <stdio.h>
 #include <string.h> /* for memcmp */
 #include "tester.h"
-#include "nv_map.h"
-#include "c_io.h"
 
-
-//#define INTEL_PMEM
+#define INTEL_PMEM
 
 int ITEM_COUNT;// = 10;
 
@@ -78,7 +75,6 @@ main(int argc, char **argv)
 				"arg6 =1 use UNDO logging\n");
 		exit(0);
 	}
-	gettimeofday(&st, NULL);
 
 #ifdef INTEL_PMEM
 #endif
@@ -92,6 +88,8 @@ main(int argc, char **argv)
 	}
 	ITEM_COUNT = atoi(argv[2]);
 	if (NULL == h) exit(-1); /*oom*/
+
+	gettimeofday(&st, NULL);
 
 	/*****************************************************************************/
 	/* Insertion */
@@ -120,6 +118,7 @@ main(int argc, char **argv)
 #ifdef INTEL_PMEM
 		void *temp;
 		k = pmemalloc_reserv_virtual(sizeof(struct key), &temp);
+		//k = (struct key *)malloc(sizeof(struct key));
 #else
 		k = (struct key *)malloc(sizeof(struct key));
 #endif
@@ -133,15 +132,23 @@ main(int argc, char **argv)
 		k->one_port = 22 + (7 * i);
 		k->two_port = 5522 - (3 * i);
 
-
-		if(use_nv == 0) {
-			v = (struct value *)malloc(sizeof(struct value));
-		}else {
-#ifdef USE_NVRAM
-			v  = (struct value *)p_c_nvalloc_(sizeof(struct value),value, 0);
+#ifdef _ENABL_DATAPERSIST
+		pmemalloc_activate_local(temp);
 #endif
-		}
+
+		//fprintf(stdout,"After insertion, hashtable contains %u items.\n",
+		//	        hashtable_count(h));
+#ifdef INTEL_PMEM
+		temp=NULL;
+		v = pmemalloc_reserv_virtual(sizeof(struct value), &temp);
+#else
+		v = (struct value *)malloc(sizeof(struct value));
+#endif
 		v->id = 100 + i;
+
+#ifdef _ENABL_DATAPERSIST
+        pmemalloc_activate_local(temp);
+#endif
 		//fprintf(stdout,"key %d, value->id %d\n",k->two_port, v->id);
 		if (!insert_some(h,k,v)) exit(-1); /*oom*/
 		//simulate failure
@@ -151,8 +158,8 @@ main(int argc, char **argv)
 		}
 	}
 	//hashtable_iterate(h);
-	//fprintf(stdout,"After insertion, hashtable contains %u items.\n",
-	//        hashtable_count(h));
+	fprintf(stdout,"After insertion, hashtable contains %u items.\n",
+	        hashtable_count(h));
 
 	/*****************************************************************************/
 	search:
@@ -219,6 +226,8 @@ main(int argc, char **argv)
 		}
 	}
 
+    gettimeofday(&en, NULL);
+    fprintf(stdout,"benchmark time %ld \n", simulation_time(st,en));
 	//if(restart)
 
 

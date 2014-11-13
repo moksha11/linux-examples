@@ -1,8 +1,9 @@
 #!/bin/bash
 
-HOMEDIR=/home/sudarsun/apps/intel_pmem_libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/linux-examples
 DATADIR=/mnt/pmfs
-NVMDIR=/home/sudarsun/nvmalloc/scripts
+#NVMDIR=/home/sudarsun/nvmalloc/scripts
+NVMDIR=$NVMALLOC_HOME/scripts
 
 sudo sync
 sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
@@ -38,4 +39,5 @@ make clean
 make -j4
 cd c-hashtable
 sudo rm -rf /mnt/pmfs/*
+sudo fallocate -l 2048M /mnt/pmfs/logfile
 sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/c-hashtable/tester 0 1000000 0 0 0 0"

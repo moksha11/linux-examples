@@ -1,7 +1,7 @@
 #!/bin/sh
 HOMEDIR=/home/stewart/codes/libs/linux-examples
 DATADIR=/mnt/pmfs
-NVMDIR=/home/stewart/codes/nvmalloc/scripts
+NVMDIR=$(NVMALLOC_HOME)/scripts
 
 sudo sync
 sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"

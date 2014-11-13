@@ -6,9 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
-
-
 #include "util/util.h"
 #include "libpmem/pmem.h"
 #include "libpmemalloc/pmemalloc.h"
@@ -248,7 +245,7 @@ hashtable_insert(struct hashtable *h, void *k, void *v)
 	e->v = v;
 	e->next = h->table[index];
 	h->table[index] = e;
-#ifdef INTEL_PMEM
+#ifdef _ENABL_DATAPERSIST
 		pmemalloc_activate_local(tmp);
 #endif
 
@@ -297,8 +294,13 @@ hashtable_remove(struct hashtable *h, void *k)
 			*pE = e->next;
 			h->entrycount--;
 			v = e->v;
+#ifdef INTEL_PMEM
+			pmemalloc_free_local(e->k);
+			pmemalloc_free_local(e);
+#else
 			freekey(e->k);
 			free(e);
+#endif
 			return v;
 		}
 		pE = &(e->next);

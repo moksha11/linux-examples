@@ -117,8 +117,8 @@ main(int argc, char **argv)
 
 #ifdef INTEL_PMEM
 		void *temp;
-		k = pmemalloc_reserv_virtual(sizeof(struct key), &temp);
-		//k = (struct key *)malloc(sizeof(struct key));
+		//k = pmemalloc_reserv_virtual(sizeof(struct key), &temp);
+		k = (struct key *)malloc(sizeof(struct key));
 #else
 		k = (struct key *)malloc(sizeof(struct key));
 #endif
@@ -133,21 +133,22 @@ main(int argc, char **argv)
 		k->two_port = 5522 - (3 * i);
 
 #ifdef _ENABL_DATAPERSIST
-		pmemalloc_activate_local(temp);
+//		pmemalloc_activate_local(temp);
 #endif
 
 		//fprintf(stdout,"After insertion, hashtable contains %u items.\n",
 		//	        hashtable_count(h));
 #ifdef INTEL_PMEM
 		temp=NULL;
-		v = pmemalloc_reserv_virtual(sizeof(struct value), &temp);
+		//v = pmemalloc_reserv_virtual(sizeof(struct value), &temp);
+		v = (struct value *)malloc(sizeof(struct value));
 #else
 		v = (struct value *)malloc(sizeof(struct value));
 #endif
 		v->id = 100 + i;
 
 #ifdef _ENABL_DATAPERSIST
-        pmemalloc_activate_local(temp);
+  //      pmemalloc_activate_local(temp);
 #endif
 		//fprintf(stdout,"key %d, value->id %d\n",k->two_port, v->id);
 		if (!insert_some(h,k,v)) exit(-1); /*oom*/
@@ -226,15 +227,15 @@ main(int argc, char **argv)
 		}
 	}
 
+    gettimeofday(&en, NULL);
+    fprintf(stdout,"benchmark time %ld \n", simulation_time(st,en));
 	//if(restart)
-	    gettimeofday(&en, NULL);
-	    fprintf(stdout,"benchmark time %ld \n", simulation_time(st,en));
-	    exit(0);
 
 
 	/*****************************************************************************/
 	/* Hashtable removal */
 
+	exit(0);
 	for (i = 0; i < ITEM_COUNT; i++)
 	{
 		k->one_ip = 0xcfccee40 + i;
@@ -248,7 +249,7 @@ main(int argc, char **argv)
 	}
 	printf("After removal, hashtable contains %u items.\n",
 			hashtable_count(h));
-
+	//exit(0);
 
 	/*****************************************************************************/
 	/* Hashtable destroy and create */
