@@ -29,41 +29,32 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Makefile -- Makefile for libpmem
+# Makefile -- top-level Makefile for Persistent Memory examples
 #
+# Use "make all" to build all examples.
+#
+# Use "make clean" to delete all intermediate files (*.o, etc).
+#
+# Use "make clobber" to delete everything re-buildable (binaries, etc.).
+#
+SUBDIRS = basic\
+	  icount\
+	  libpmem\
+	  libpmemalloc\
+	  trivial\
+	  binarytree\
+	  c-hashtable\
+	  btree-1.0\
+	  util
 
-TARGETS = libpmem.a libpmem.so
-INCS = -I..
-OBJS = pmem.o pmem_cl.o pmem_fit.o pmem_msync.o util.o
-MAPFILE = pmem.map
-SOVERSION = 1
-#CFLAGS = -ggdb -D_DONTPERSIST
-CFLAGS = -D_NODATAPERSIST -D_ENABLE_LOG -D_PREMAPPED_FILE #-D_DONTPERSIST
-STATICDEP=/usr/lib/libpmemlog.a
-DEP=-lpmemlog $(STATICDEP)
+all	: TARGET = all
+clean	: TARGET = clean
+clobber	: TARGET = clobber
+test	: TARGET = test
 
-all: $(TARGETS)
+all clean clobber test: $(SUBDIRS)
 
-libpmem.a: $(OBJS)
-	$(AR) rv $@ $(OBJS) $(STATICDEP)
+$(SUBDIRS):
+	$(MAKE) -C $@ $(TARGET)
 
-libpmem.so: $(OBJS)
-	$(CC) $(CFLAGS) -shared -Wl,--version-script=$(MAPFILE),-soname,$(SONAME).$(SOVERSION) -o $@ $(OBJS) $(DEP)
-
-.c.o:
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(DEP) -fPIC $<
-
-util.o: ../util/util.c ../util/util.h
-	$(CC) -c -o $@ $(CFLAGS) $(INCS) $(DEP) -fPIC $<
-
-clean:
-	$(RM) *.o core a.out
-
-clobber: clean
-	$(RM) $(TARGETS)
-
-test:
-	# no libpmem unit test
-	@echo PASS
-
-.PHONY: all clean clobber test
+.PHONY: all clean clobber test $(SUBDIRS)

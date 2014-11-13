@@ -52,13 +52,14 @@
 #include <libpmemlog.h>
 
 #define _DATAPERSIST 10
+//#define _NOPERSIST
 
 #define	ALIGN 64	/* assumes 64B cache line size */
 
-//#define ENABLE_LOG
+//#define _ENABLE_LOG
 PMEMlogpool *g_plp;
 
-#ifdef ENABLE_LOG
+#ifdef _ENABLE_LOG
 PMEMlogpool *create_log(){
 
 	const char path[] = "/mnt/pmfs/logfile";
@@ -68,6 +69,8 @@ PMEMlogpool *create_log(){
 
 	fprintf(stderr, "creating log file \n");
 
+#ifdef _PREMAPPED_FILE
+#else
 	/* create file on PMEM-aware file system */
 	if ((fd = open(path, O_CREAT|O_RDWR, 0666)) < 0) {
 		perror("open");
@@ -76,12 +79,12 @@ PMEMlogpool *create_log(){
 
 	/* pre-allocate 2GB of persistent memory */
 	if ((errno = posix_fallocate(fd, (off_t)0,
-					(size_t)1024 * 1024 * 512)) != 0) {
+					(size_t)1024 * 1024 * 2048)) != 0) {
 		perror("posix_fallocate");
 		exit(1);
 	}
 	close(fd);
-
+#endif
 	/* create a persistent memory resident log */
 	if ((g_plp = pmemlog_pool_open(path)) == NULL) {
 		perror("pmemlog_pool_open");
@@ -122,7 +125,7 @@ pmem_map_cl(int fd, size_t len)
 					fd, 0)) == MAP_FAILED)
 		return NULL;
 
-#ifdef ENABLE_LOG
+#ifdef _ENABLE_LOG
 	create_log();
 #endif
 
@@ -189,11 +192,12 @@ pmem_persist_cl(void *addr, size_t len, int flags)
      return;
 #endif
 
-#ifdef ENABLE_LOG
+#ifdef _ENABLE_LOG
+	 //fprintf(stdout,"writing log \n");
 	 write_log(g_plp, addr, len);
-#endif
-
+#else
 	pmem_flush_cache_cl(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores_cl();
+#endif
 }
