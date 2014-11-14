@@ -37,7 +37,7 @@ cd binarytree
 
 sudo rm -rf /mnt/pmfs/*
 sudo cp $HOMEDIR/binarytree/*.txt $DATADIR
-
+sudo fallocate -l 2048M /mnt/pmfs/logfile
 
 cd $DATADIR
 
