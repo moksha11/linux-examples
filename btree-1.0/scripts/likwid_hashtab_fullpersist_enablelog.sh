@@ -30,6 +30,19 @@ sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' btree-1.0/Makefile
 sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' basic/Makefile
 sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' Makefile.inc
 
+
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.h
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.h
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' btree-1.0/bt_code.c
+
+
+
+
+
 make clean
 make -j4
 cd btree-1.0

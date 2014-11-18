@@ -32,13 +32,15 @@ sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' basic/Makefile
 sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' Makefile.inc
 
 
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.c
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.h
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.h
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.c
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
-sed -i 's/#define _NOPERSIST/#define _PERSIST/' btree-1.0/bt_code.c
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' libpmemalloc/pmemalloc.c
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' libpmemalloc/pmemalloc.h
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' libpmem/pmem.h
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' libpmem/pmem.c
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' libpmem/pmem_cl.c
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' libpmem/pmem_fit.c
+sed -i 's/#define _PERSIST/#define _NOPERSIST/' btree-1.0/bt_code.c
+
+
 
 
 #sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' libpmem/pmem_cl.c

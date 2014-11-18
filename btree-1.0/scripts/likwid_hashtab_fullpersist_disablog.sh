@@ -34,6 +34,15 @@ sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' c-hashtable/Makefile
 sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' binarytree/Makefile
 
 
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.h
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.h
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' btree-1.0/bt_code.c
+
+
 
 
 #sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' libpmem/pmem_cl.c

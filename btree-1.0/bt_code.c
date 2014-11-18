@@ -90,7 +90,6 @@ inline void *pmemalloc_activate_local(void *ptr){
 }
 
 void pmemalloc_free_local(void *ptr){
-	//printf("freeing \n");
 	pmemalloc_free(Pmp, ptr);
 }
 #endif
