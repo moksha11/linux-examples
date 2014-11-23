@@ -157,6 +157,7 @@ main(int argc, char **argv)
 	}
 
 	bt_dumptree(bt);
+
 #ifdef INTEL_PMEM
 	void *tmp;
 	nums =pmemalloc_reserv_virtual(sizeof *nums * t, &tmp);
@@ -170,21 +171,21 @@ main(int argc, char **argv)
 	for (i = 0; i < t; i++) {
 		if (i == 1)
 			puts("gcc suck rocks!");
-		do
-			nums[i] = random();
+		//do
+		nums[i] = random();
 
-		while (checkdup(nums, i, nums[i]));
+		//while (checkdup(nums, i, nums[i]));
 		bt_insert(bt, nums[i]);
-		if (!bt_checktree(bt, 0x0, 0xffffffff)) {
+		/*if (!bt_checktree(bt, 0x0, 0xffffffff)) {
 			printf("tree isn't in order after insert!!, at %d:%p\n",
 					i, nums[i]);
-			/*bt_dumptree(bt);*/
-			exit(1);
-		}
+			//bt_dumptree(bt);
+			//exit(1);
+		}*/
 	}
 	printf("done inserting, now searching...\n");
 	//bt_dumptree(bt);
-#if 0
+#if 1
 	for (i = 0; i < t; i++)
 		if ((tnum = bt_find(bt, nums[i])) != nums[i]) {
 			printf("can't find node %d, found %d instead.\n",
@@ -193,21 +194,39 @@ main(int argc, char **argv)
 		}
 #endif
 	printf("done searching, now deleting...\n");
-	/*bt_dumptree(bt);*/
+
+#if 0
 	for (i = 0; i < t; i++) {
 		/*printf("deleting %p\n", nums[i]);*/
 		if (bt_delete(bt, nums[i]) != nums[i]) {
 			printf("failed to delete %d:%p.\n", i, nums[i]);
 			exit(1);
 		}
-		/*if (!bt_checktree(bt, 0x0, 0xffffffff)) {
-			printf("tree isn't in order after del!!, at %d:%p\n", i,
-			    nums[i]);
-			bt_dumptree(bt);
-			exit(1);
-		}*/
-		/*bt_dumptree(bt);*/
 	}
+#endif
+
+
+	/*bt_dumptree(bt);*/
+
+	for (i = t; i > 0; i--) {
+		if (i == 1)
+			puts("gcc suck rocks!");
+		//do
+		nums[i] = random();
+
+		//while (checkdup(nums, i, nums[i]));
+		bt_insert(bt, nums[i]);
+		/*if (!bt_checktree(bt, 0x0, 0xffffffff)) {
+			printf("tree isn't in order after insert!!, at %d:%p\n",
+					i, nums[i]);
+			//bt_dumptree(bt);
+			//exit(1);
+		}*/
+	}
+
+
+
+
 	//bt_dumptree(bt);
 #endif
 	exit(0);

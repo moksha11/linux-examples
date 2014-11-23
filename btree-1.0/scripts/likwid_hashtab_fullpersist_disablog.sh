@@ -42,14 +42,25 @@ sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' btree-1.0/bt_code.c
 
+sed -i 's/#define _STARTEPOCH/#define _STOPEPOCH/' libpmem/epoch.c
+
+make clean
+cd libpmem
+make clean
+make
+cd ..
+
+cd libpmemalloc
+make clean
+make
+cd ..
+make -j4 > dump.txt
 
 
 
 #sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' libpmem/pmem_cl.c
 
-make clean
-make -j4
 cd btree-1.0
 sudo rm -rf /mnt/pmfs/*
 sudo fallocate -l 2048M /mnt/pmfs/logfile
-sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test 100000"
+sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test $1"

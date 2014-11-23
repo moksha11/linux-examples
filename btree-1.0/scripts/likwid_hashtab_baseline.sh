@@ -49,7 +49,7 @@ make clean
 make -j4
 cd btree-1.0
 sudo rm -rf /mnt/pmfs/*
-sudo fallocate -l 2048M /mnt/pmfs/logfile
-sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test 100000"
+#sudo fallocate -l 2048M /mnt/pmfs/logfile
+sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test $1"
 
 
