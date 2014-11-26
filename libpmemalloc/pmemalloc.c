@@ -49,6 +49,8 @@
 #include "libpmem/pmem.h"
 #include "pmemalloc.h"
 
+#define _PERSIST
+
 /*
  * hidden bytes added to each allocation.  the metadata we keep for
  * each allocation is 64 bytes in size so when we return the
@@ -188,6 +190,20 @@ pmemalloc_coalesce_free(void *pmp)
 	struct clump *firstfree;
 	struct clump *lastfree;
 	size_t csize;
+	int flags=0;
+
+#ifdef _NOPERSIST
+	return;
+#endif
+
+#ifdef _NODATAPERSIST
+      if(!enable_persist()) {
+         flags = _DATAPERSIST;
+        // printf("enbling no free flag \n");
+      }else {
+        flags = 0;
+      }
+#endif
 
 	//DEBUG("pmp=0x%lx", pmp);
 
@@ -211,7 +227,7 @@ pmemalloc_coalesce_free(void *pmp)
 		} else if (firstfree != NULL && lastfree != NULL) {
 			//DEBUG("coalesced size 0x%lx", csize);
 			firstfree->size = csize | PMEM_STATE_FREE;
-			pmem_persist(firstfree, sizeof(*firstfree), 0);
+			pmem_persist(firstfree, sizeof(*firstfree), flags);
 			firstfree = lastfree = NULL;
 			csize = 0;
 		} else {
@@ -223,7 +239,7 @@ pmemalloc_coalesce_free(void *pmp)
 		//DEBUG("next clp %lx, offset 0x%lx", clp, OFF(pmp, clp));
 	}
 	if (firstfree != NULL && lastfree != NULL) {
-		//DEBUG("coalesced size 0x%lx", csize);
+		//printf("coalesced size 0x%lx", csize);
 		//DEBUG("firstfree 0x%lx next clp after firstfree will be 0x%lx",
 		//		firstfree, (uintptr_t)firstfree + csize);
 		firstfree->size = csize | PMEM_STATE_FREE;
@@ -319,9 +335,10 @@ pmemalloc_init(const char *path, size_t size)
 		hdr.totalsize = size;
 		if (pwrite(fd, &hdr, sizeof(hdr), PMEM_HDR_OFFSET) < 0)
 			goto out;
-
+#ifndef _NOPERSIST
 		if (fsync(fd) < 0)
 			goto out;
+#endif
 
 	} else {
 		if ((fd = open(path, O_RDWR)) < 0)
@@ -331,12 +348,17 @@ pmemalloc_init(const char *path, size_t size)
 		/* XXX handle recovery case 1 described below */
 	}
 
+	
+
+	fprintf(stdout, "calling pmem_map \n");
 	/*
 	 * map the file
 	 */
 	if ((pmp = pmem_map(fd, size)) == NULL)
 		goto out;
 
+
+#ifndef _NOPERSIST
 	/*
 	 * scan pool for recovery work, five kinds:
 	 * 	1. pmem pool file sisn't even fully setup
@@ -347,6 +369,7 @@ pmemalloc_init(const char *path, size_t size)
 	 */
 	pmemalloc_recover(pmp);
 	pmemalloc_coalesce_free(pmp);
+#endif
 
 	//DEBUG("return pmp 0x%lx", pmp);
 	return pmp;
@@ -581,6 +604,16 @@ pmemalloc_onfree(void *pmp, void *ptr_, void **parentp_, void *nptr_)
 {
 	struct clump *clp;
 	int i;
+	int flags = 0;
+
+#ifdef _NODATAPERSIST
+      if(!enable_persist()) {
+         flags = _DATAPERSIST;
+		// printf("enbling no free flag \n");
+      }else {
+		flags = 0;
+	  }
+#endif
 
 	//DEBUG("pmp=0x%lx, ptr_=0x%lx, parentp_=0x%lx, nptr_=0x%lx",
 	//		pmp, ptr_, parentp_, nptr_);
@@ -606,7 +639,7 @@ pmemalloc_onfree(void *pmp, void *ptr_, void **parentp_, void *nptr_)
 			 * 4. make off persistent
 			 */
 			clp->on[i].ptr_ = nptr_;
-			pmem_persist(clp, sizeof(*clp), 0);
+			pmem_persist(clp, sizeof(*clp), flags);
 			clp->on[i].off = OFF(pmp, parentp_);
 			pmem_persist(clp, sizeof(*clp), 0);
 			return;
@@ -686,6 +719,15 @@ pmemalloc_free(void *pmp, void *ptr_)
 	size_t sz;
 	int state;
 	int i;
+	int flags=0;
+#ifdef _NODATAPERSIST
+      if(!enable_persist()) {
+         flags = _DATAPERSIST;
+             //    printf("enbling no free flag \n");
+      }else {
+                flags = 0;
+          }
+#endif
 
 	//DEBUG("pmp=%lx, ptr_=%lx", pmp, ptr_);
 
@@ -714,13 +756,13 @@ pmemalloc_free(void *pmp, void *ptr_)
 		 * 5. persist *clp
 		 */
 		clp->size = sz | PMEM_STATE_FREEING;
-		pmem_persist(clp, sizeof(*clp), 0);
+		pmem_persist(clp, sizeof(*clp), flags);
 		for (i = 0; i < PMEM_NUM_ON; i++)
 			if (clp->on[i].off) {
 				uintptr_t *dest =
 					PMEM(pmp, (uintptr_t *)clp->on[i].off);
 				*dest = (uintptr_t)clp->on[i].ptr_;
-				pmem_persist(dest, sizeof(*dest), 0);
+				pmem_persist(dest, sizeof(*dest), flags);
 			} else
 				break;
 		for (i = PMEM_NUM_ON - 1; i >= 0; i--)
@@ -728,7 +770,7 @@ pmemalloc_free(void *pmp, void *ptr_)
 		pmem_persist(clp, sizeof(*clp), 0);
 	}
 	clp->size = sz | PMEM_STATE_FREE;
-	pmem_persist(clp, sizeof(*clp), 0);
+	pmem_persist(clp, sizeof(*clp), flags);
 
 	/*
 	 * at this point we may have adjacent free clumps that need

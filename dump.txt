@@ -1,0 +1,80 @@
+make -C basic all
+make -C libpmem all
+make -C libpmemalloc all
+make -C binarytree all
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmemalloc'
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/basic'
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a basic.c -o basic.o
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make[1]: Nothing to be done for `all'.
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make -C ../libpmem
+make -C icount all
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/binarytree'
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a tree.c -o tree.o
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/icount'
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a icount_test.c -o icount_test.o
+make[2]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmemalloc'
+cc -c -o icount.o -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a ../icount/icount.c
+cc -c -o util.o -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a ../util/util.c
+cc -c -o util.o -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a ../util/util.c
+cc -c -o icount.o -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a ../icount/icount.c
+cc -c -o util.o -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a ../util/util.c
+cc -c -o icount.o -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a ../icount/icount.c
+make -C ../libpmemalloc -lpmemlog -lpthread /usr/lib/libpmemlog.a
+make[2]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmemalloc'
+make[2]: Nothing to be done for `/usr/lib/libpmemlog.a'.
+make[2]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmemalloc'
+make -C trivial all
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/trivial'
+make[1]: Nothing to be done for `all'.
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/trivial'
+make -C ../libpmem
+make[2]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make -C c-hashtable all
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/c-hashtable'
+gcc  -g -Wall -O -c hashtable.c -o hashtable.o -I../  -g -Wall -pipe -fvisibility=hidden -funroll-loops  -Wno-implicit -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC -D_ENABLE_LOG -D_ENABL_DATAPERSIST 	 -lpthread ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread 
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/icount'
+gcc  -g -Wall -O -c tester.c -o tester.o -I../  -g -Wall -pipe -fvisibility=hidden -funroll-loops  -Wno-implicit -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC -D_ENABLE_LOG -D_ENABL_DATAPERSIST 	 -lpthread ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread 
+make -C ../libpmem
+make[2]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/libpmem'
+cc -o basic -O2 -Wall -Werror -D_ENABL_DATAPERSIST  basic.o util.o icount.o ../libpmem/libpmem.a ../libpmem/libpmem.a -lpmemlog -lpthread /usr/lib/libpmemlog.a /usr/lib/libpmemlog.a
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/basic'
+make -C btree-1.0 all
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/btree-1.0'
+cc  -D_NODATAPERSIST -D_DISABLE_LOG  -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c bt_code.c -o bt_code.o -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a tree_insert.c -o tree_insert.o
+gcc  -g -Wall -O -c hashtable_itr.c -o hashtable_itr.o -I../  -g -Wall -pipe -fvisibility=hidden -funroll-loops  -Wno-implicit -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC -D_ENABLE_LOG -D_ENABL_DATAPERSIST 	 -lpthread ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread 
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a tree_walk.c -o tree_walk.o
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a tree_free.c -o tree_free.o
+gcc  -g -Wall -O -lm -o tester hashtable.o hashtable_itr.o tester.o -I../  -g -Wall -pipe -fvisibility=hidden -funroll-loops  -Wno-implicit -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC -D_ENABLE_LOG -D_ENABL_DATAPERSIST 	 -L-lpthread ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread 
+cc  -D_NODATAPERSIST -D_DISABLE_LOG  -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c bt_output.c -o bt_output.o -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc -c -O2 -Wall -Werror -D_ENABL_DATAPERSIST  -I.. -lpmemlog -lpthread /usr/lib/libpmemlog.a tree_wordfreq.c -o tree_wordfreq.o
+cc -fpic  -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c bt_code.c -o bt_code.so -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc -fpic  -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c bt_output.c -o bt_output.so -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/c-hashtable'
+make -C util all
+make[1]: Entering directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/util'
+make[1]: Nothing to be done for `all'.
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/util'
+cc   -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c bt_code.c -o bt_code.po -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc   -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c bt_output.c -o bt_output.po -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc -o tree_insert -O2 -Wall -Werror -D_ENABL_DATAPERSIST  tree.o util.o icount.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a tree_insert.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread /usr/lib/libpmemlog.a /usr/lib/libpmemlog.a
+cc -o tree_walk -O2 -Wall -Werror -D_ENABL_DATAPERSIST  tree.o util.o icount.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a tree_walk.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread /usr/lib/libpmemlog.a /usr/lib/libpmemlog.a
+cc  -D_NODATAPERSIST -D_DISABLE_LOG  -Wall  -I.   -D_NODATAPERSIST -D_DISABLE_LOG   -c main.c -o main.o -I../ ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc -o tree_free -O2 -Wall -Werror -D_ENABL_DATAPERSIST  tree.o util.o icount.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a tree_free.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread /usr/lib/libpmemlog.a /usr/lib/libpmemlog.a
+ar rc libbtree.a bt_code.o bt_output.o
+cc -shared -o libbtree.so.1 bt_code.so bt_output.so
+cc -o tree_wordfreq -O2 -Wall -Werror -D_ENABL_DATAPERSIST  tree.o util.o icount.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a tree_wordfreq.o ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread /usr/lib/libpmemlog.a /usr/lib/libpmemlog.a
+ar rc libbtree_p.a bt_code.po bt_output.po
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/binarytree'
+#cc -static  -o test main.o   libbtree_p.a  btree.h  ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+cc  -o test main.o   libbtree_p.a  btree.h  ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog  -lpthread
+make[1]: Leaving directory `/home/sudarsun/libs/intelmachine/libs/linux-examples/btree-1.0'

@@ -50,9 +50,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <libpmemlog.h>
+#include <assert.h>
 
 #define _DATAPERSIST 10
-//#define _NOPERSIST
+#define _PERSIST
 
 #define	ALIGN 64	/* assumes 64B cache line size */
 
@@ -165,15 +166,19 @@ pmem_flush_cache_cl(void *addr, size_t len, int flags)
 #ifdef _NOPERSIST
     return;
 #elif _NODATAPERSIST
-     if(flags == _DATAPERSIST)
-     return;
+if(flags == _DATAPERSIST){
+    if(!enable_persist()) {
+       return;
+     }else {
+     }
+   }
 #endif
 	uintptr_t uptr;
 	
 	/* loop through 64B-aligned chunks covering the given range */
 	for (uptr = (uintptr_t)addr & ~(ALIGN - 1);
 			uptr < (uintptr_t)addr + len; uptr += 64)
-		__builtin_ia32_clflush((void *)uptr);
+		__builtin_ia32_clflush((void *)uptr); 
 }
 
 /*
@@ -188,16 +193,18 @@ pmem_persist_cl(void *addr, size_t len, int flags)
 #ifdef _NOPERSIST
     return;
 #elif _NODATAPERSIST
-     if(flags == _DATAPERSIST)
-     return;
+ if(flags == _DATAPERSIST){
+     if(!enable_persist()) {
+        return;
+      }else {
+      }
+    }
 #endif
 
 #ifdef _ENABLE_LOG
-	 //fprintf(stdout,"writing log \n");
 	 write_log(g_plp, addr, len);
-#else
+#endif
 	pmem_flush_cache_cl(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores_cl();
-#endif
 }

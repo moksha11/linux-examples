@@ -1,7 +1,7 @@
 #!/bin/sh
-HOMEDIR=/home/sudarsun/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
 DATADIR=/mnt/pmfs
-NVMDIR=/home/sudarsun/nvmalloc/scripts
+NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 
 sudo rm -rf /mnt/pmfs/*
 
@@ -12,7 +12,7 @@ sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
 sudo sync
 
 
-for i in 100000 500000 1000000 2000000 # 500000 2000000 3000000
+for i in  50000 250000 750000 1000000  #100000 500000 #1000000 2000000 # 500000 2000000 3000000
 
 do
 

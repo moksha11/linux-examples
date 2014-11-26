@@ -38,7 +38,7 @@
 #
 INCS = -I..
 #CFLAGS = -ggdb -Wall -Werror #-D_DELAYFREE
-CFLAGS = -O2 -Wall -Werror -D_NODATAPERSIST #-D_DELAYFRE
+CFLAGS = -O2 -Wall -Werror -D_ENABL_DATAPERSIST #-D_DELAYFRE 
 STATICLIBS=/usr/lib/libpmemlog.a
 LIBS=-lpmemlog -lpthread $(STATICLIBS)
 

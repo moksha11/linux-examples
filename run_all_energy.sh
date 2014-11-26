@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOMEDIR=/home/sudarsun/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
 
 
 cd $HOMEDIR

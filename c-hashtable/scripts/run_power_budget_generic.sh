@@ -1,7 +1,7 @@
 #!/bin/sh
 #second arg is how long to budget power
 
-POWERBUGET=/home/sudarsun/PowerTools
+POWERBUGET=/home/sudarsun/libs/intelmachine/PowerTools
 OUT=outputs
 
 mkdir $OUT

@@ -34,11 +34,11 @@
 
 TARGETS = libpmem.a libpmem.so
 INCS = -I..
-OBJS = pmem.o pmem_cl.o pmem_fit.o pmem_msync.o util.o
+OBJS = pmem.o pmem_cl.o pmem_fit.o pmem_msync.o util.o epoch.o
 MAPFILE = pmem.map
 SOVERSION = 1
 #CFLAGS = -ggdb -D_DONTPERSIST
-CFLAGS = -D_NODATAPERSIST -D_ENABLE_LOG -D_PREMAPPED_FILE #-D_DONTPERSIST
+CFLAGS = -D_ENABL_DATAPERSIST -D_ENABLE_LOG #-D_PREMAPPED_FILE #-D_DONTPERSIST
 STATICDEP=/usr/lib/libpmemlog.a
 DEP=-lpmemlog $(STATICDEP)
 
