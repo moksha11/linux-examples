@@ -35,7 +35,7 @@
  */
 
 #define _DATAPERSIST 10
-
+#define _PERSIST
 
 void pmem_msync_mode(void);	/* for testing on non-PM memory-mapped files */
 void pmem_fit_mode(void);	/* for fault injection testing */

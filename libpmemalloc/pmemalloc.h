@@ -36,6 +36,8 @@
 
 #include <stdint.h>
 
+#define _PERSIST
+
 /*
  * size of the static area returned by pmem_static_area()
  */

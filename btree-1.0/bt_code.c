@@ -49,6 +49,7 @@
 
 //#define _USE_NVMALLOC
 #define INTEL_PMEM
+//#define _PERSIST
 
 #ifdef INTEL_PMEM
 
@@ -82,6 +83,8 @@ inline void *pmemalloc_reserv_virtual(size_t size, void **tmp){
 
 inline void *pmemalloc_activate_local(void *ptr){
 #ifdef INTEL_PMEM
+#ifdef _NOPERSIST
+#endif
 	pmemalloc_onactive(Pmp, ptr,root, ptr);
 	pmemalloc_activate(Pmp, ptr);
 #else
@@ -90,12 +93,16 @@ inline void *pmemalloc_activate_local(void *ptr){
 }
 
 void pmemalloc_free_local(void *ptr){
+#ifdef _NOPERSIST
+#endif
 	//printf("freeing \n");
 	pmemalloc_free(Pmp, ptr);
 }
 #endif
 
 inline void pmem_persist_local(void *src, size_t len, int flags){
+#ifdef _NOPERSIST
+#endif
 	pmem_persist(src, len,_DATAPERSIST);
 }
 
@@ -106,6 +113,10 @@ inline void * persist_memmove ( void * destination, const void * source, size_t 
   void *ptr = memmove (destination, source, num );
 
 #ifdef INTEL_PMEM
+
+#ifdef _NOPERSIST
+#endif
+
 
 #ifdef _NODATAPERSIST
 		pmem_persist_local(destination, num,_DATAPERSIST);
@@ -119,6 +130,8 @@ inline void * persist_memmove ( void * destination, const void * source, size_t 
 inline FREE(void *ptr){
 
 #ifdef INTEL_PMEM
+#ifdef _NOPERSIST
+#endif
 	//printf("deleting \n");
 	pmemalloc_free_local(ptr);
 #else

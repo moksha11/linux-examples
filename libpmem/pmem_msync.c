@@ -114,6 +114,7 @@ pmem_flush_cache_msync(void *addr, size_t len, int flags)
 void
 pmem_persist_msync(void *addr, size_t len, int flags)
 {
+	//fprintf(stderr,"calling pmem_persist_msync \n");
 	pmem_flush_cache_msync(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores_msync();

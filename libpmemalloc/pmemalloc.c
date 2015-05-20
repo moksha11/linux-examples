@@ -49,6 +49,9 @@
 #include "libpmem/pmem.h"
 #include "pmemalloc.h"
 
+#define _PERSIST
+
+
 /*
  * hidden bytes added to each allocation.  the metadata we keep for
  * each allocation is 64 bytes in size so when we return the
@@ -189,6 +192,8 @@ pmemalloc_coalesce_free(void *pmp)
 	struct clump *lastfree;
 	size_t csize;
 
+#ifdef _NOPERSIST
+#endif
 	//DEBUG("pmp=0x%lx", pmp);
 
 	firstfree = lastfree = NULL;
@@ -319,9 +324,10 @@ pmemalloc_init(const char *path, size_t size)
 		hdr.totalsize = size;
 		if (pwrite(fd, &hdr, sizeof(hdr), PMEM_HDR_OFFSET) < 0)
 			goto out;
-
+#ifndef _NOPERSIST
 		if (fsync(fd) < 0)
 			goto out;
+#endif
 
 	} else {
 		if ((fd = open(path, O_RDWR)) < 0)

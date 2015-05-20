@@ -8,7 +8,7 @@ sudo sync
 sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
 sudo sync
 
-cd ../
+cd $HOMEDIR
 sed -i 's/\-D_ENABL_DATAPERSIST/\-D_NODATAPERSIST/' ./trivial/Makefile
 sed -i 's/\-D_ENABL_DATAPERSIST/\-D_NODATAPERSIST/' ./icount/Makefile
 sed -i 's/\-D_ENABL_DATAPERSIST/\-D_NODATAPERSIST/' ./libpmemalloc/Makefile
@@ -44,7 +44,11 @@ sudo cp $HOMEDIR/binarytree/*.txt $DATADIR
 
 cd $DATADIR
 
-sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/binarytree/tree_wordfreq $DATADIR/tesfile $DATADIR/4000.txt $DATADIR/4300.txt  $DATADIR/4302.txt  $DATADIR/4309.txt  $DATADIR/4500.txt"
+#sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/binarytree/tree_wordfreq $DATADIR/tesfile $DATADIR/4000.txt $DATADIR/4300.txt  $DATADIR/4302.txt  $DATADIR/4309.txt  $DATADIR/4500.txt"
+
+sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/binarytree/tree_wordfreq $DATADIR/tesfile $DATADIR/4500.txt"
+
+
 
 
 

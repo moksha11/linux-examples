@@ -8,7 +8,7 @@ sudo sync
 sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
 sudo sync
 
-cd ../
+cd $HOMEDIR
 sed -i 's/\-D_ENABL_DATAPERSIST/\-D_NODATAPERSIST/' ./trivial/Makefile
 sed -i 's/\-D_ENABL_DATAPERSIST/\-D_NODATAPERSIST/' ./icount/Makefile
 sed -i 's/\-D_ENABL_DATAPERSIST/\-D_NODATAPERSIST/' ./libpmemalloc/Makefile

@@ -10,7 +10,7 @@ CFLAGS := -g -Wall -pipe -fvisibility=hidden \
       -funroll-loops  -Wno-implicit -Wno-uninitialized \
       -Wno-unused-but-set-variable \
       -Wno-unused-function -Wno-unused-variable -lm -lssl  -fPIC \
-      -D_ENABLE_LOG -D_NODATAPERSIST 	
+      -D_ENABLE_LOG -D_ENABL_DATAPERSIST 	
 LIBFILES = ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a -lpmemlog -lpthread
 LIBS=  -lpthread $(LIBFILES) #-lnvmchkpt
 

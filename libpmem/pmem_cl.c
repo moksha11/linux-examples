@@ -52,7 +52,8 @@
 #include <libpmemlog.h>
 
 #define _DATAPERSIST 10
-//#define _NOPERSIST
+
+unsigned int logsz;
 
 #define	ALIGN 64	/* assumes 64B cache line size */
 
@@ -69,8 +70,8 @@ PMEMlogpool *create_log(){
 
 	fprintf(stderr, "creating log file \n");
 
-#ifdef _PREMAPPED_FILE
-#else
+//#ifdef _PREMAPPED_FILE
+//#else
 	/* create file on PMEM-aware file system */
 	if ((fd = open(path, O_CREAT|O_RDWR, 0666)) < 0) {
 		perror("open");
@@ -84,7 +85,7 @@ PMEMlogpool *create_log(){
 		exit(1);
 	}
 	close(fd);
-#endif
+//#endif
 	/* create a persistent memory resident log */
 	if ((g_plp = pmemlog_pool_open(path)) == NULL) {
 		perror("pmemlog_pool_open");
@@ -125,8 +126,10 @@ pmem_map_cl(int fd, size_t len)
 					fd, 0)) == MAP_FAILED)
 		return NULL;
 
+#ifndef _NOPERSIST
 #ifdef _ENABLE_LOG
 	create_log();
+#endif
 #endif
 
 	return base;
@@ -172,8 +175,10 @@ pmem_flush_cache_cl(void *addr, size_t len, int flags)
 	
 	/* loop through 64B-aligned chunks covering the given range */
 	for (uptr = (uintptr_t)addr & ~(ALIGN - 1);
-			uptr < (uintptr_t)addr + len; uptr += 64)
-		__builtin_ia32_clflush((void *)uptr);
+			uptr < (uintptr_t)addr + len; uptr += 64) {
+		//__builtin_ia32_clflush((void *)uptr);
+		asm volatile ("clflush (%0)" :: "r"(uptr));
+	}
 }
 
 /*
@@ -193,11 +198,12 @@ pmem_persist_cl(void *addr, size_t len, int flags)
 #endif
 
 #ifdef _ENABLE_LOG
-	 //fprintf(stdout,"writing log \n");
+	 //fprintf(stderr,"writing log \n");	
 	 write_log(g_plp, addr, len);
-#else
+	 //logsz += len;
+#endif
 	pmem_flush_cache_cl(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores_cl();
-#endif
+//#endif
 }

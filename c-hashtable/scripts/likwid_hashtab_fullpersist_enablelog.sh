@@ -33,6 +33,7 @@ sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' Makefile.inc
 make clean
 make -j4
 cd c-hashtable
+make -j4
 sudo rm -rf /mnt/pmfs/*
 sudo fallocate -l 2048M /mnt/pmfs/logfile
 sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/c-hashtable/tester 0 1000000 0 0 0 0"

@@ -86,7 +86,8 @@ tree_init(const char *path, size_t size)
 		FATALSYS("pmemalloc_init on %s", path);
 }
 
-#ifdef NOPERSIST
+//#ifdef _NOPERSIST
+#if 0
 /*
  * tree_insert_subtree -- insert a string or bump count if found
  *
