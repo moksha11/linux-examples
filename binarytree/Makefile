@@ -36,8 +36,13 @@ OBJS = tree.o util.o icount.o
 LIBFILES = ../libpmemalloc/libpmemalloc.a ../libpmem/libpmem.a
 CLOBBERFILES = 4000.txt 4300.txt 4302.txt 4309.txt 4500.txt\
 	       4000.zip 4300.zip 4302.zip 4309.zip 4500.zip
+<<<<<<< HEAD
 CFLAGS = -D_ENABL_DATAPERSIST -D_ENABLE_LOG #-D_DELAYFREE
 CFLAGS = -ggdb -D_ENABL_DATAPERSIST -D_NOPERSIST #-D_DELAYFREE
+=======
+CFLAGS = -D_ENABL_DATAPERSIST -D_DISABLE_LOG #-D_DELAYFREE
+CFLAGS = -ggdb -D_ENABL_DATAPERSIST #-D_DELAYFREE
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 
 include ../Makefile.inc
 

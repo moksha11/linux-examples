@@ -1,7 +1,7 @@
 #!/bin/sh
-HOMEDIR=/home/sudarsun/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
 DATADIR=/mnt/pmfs
-#NVMDIR=/home/sudarsun/nvmalloc/scripts
+#NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 NVMDIR=$NVMALLOC_HOME/scripts
 
 sudo sync
@@ -31,15 +31,42 @@ sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' binarytree/Makefile
 sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' basic/Makefile
 sed -i 's/_ENABLE_LOG/_DISABLE_LOG/' Makefile.inc
 
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmemalloc/pmemalloc.h
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.h
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' binarytree/tree.c
+
+
 
 #sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' libpmem/pmem_cl.c
 
+sed -i 's/#define _STARTEPOCH/#define _STOPEPOCH/' libpmem/epoch.c
+
 make clean
-make -j4
+cd libpmem
+make clean
+make
+cd ..
+
+cd libpmemalloc
+make clean
+make
+cd ..
+make -j4 > dump.txt
+
+
+
 cd binarytree
 
 sudo rm -rf /mnt/pmfs/*
 sudo cp $HOMEDIR/binarytree/*.txt $DATADIR
+sudo fallocate -l 2048M /mnt/pmfs/logfile
+
+make clean
+make -j4
 
 
 cd $DATADIR

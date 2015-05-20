@@ -50,10 +50,15 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <libpmemlog.h>
+#include <assert.h>
 
 #define _DATAPERSIST 10
+<<<<<<< HEAD
 
 unsigned int logsz;
+=======
+#define _PERSIST
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 
 #define	ALIGN 64	/* assumes 64B cache line size */
 
@@ -168,17 +173,26 @@ pmem_flush_cache_cl(void *addr, size_t len, int flags)
 #ifdef _NOPERSIST
     return;
 #elif _NODATAPERSIST
-     if(flags == _DATAPERSIST)
-     return;
+if(flags == _DATAPERSIST){
+    if(!enable_persist()) {
+       return;
+     }else {
+     }
+   }
 #endif
 	uintptr_t uptr;
 	
 	/* loop through 64B-aligned chunks covering the given range */
 	for (uptr = (uintptr_t)addr & ~(ALIGN - 1);
+<<<<<<< HEAD
 			uptr < (uintptr_t)addr + len; uptr += 64) {
 		//__builtin_ia32_clflush((void *)uptr);
 		asm volatile ("clflush (%0)" :: "r"(uptr));
 	}
+=======
+			uptr < (uintptr_t)addr + len; uptr += 64)
+		__builtin_ia32_clflush((void *)uptr); 
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 }
 
 /*
@@ -193,17 +207,28 @@ pmem_persist_cl(void *addr, size_t len, int flags)
 #ifdef _NOPERSIST
     return;
 #elif _NODATAPERSIST
-     if(flags == _DATAPERSIST)
-     return;
+ if(flags == _DATAPERSIST){
+     if(!enable_persist()) {
+        return;
+      }else {
+      }
+    }
 #endif
 
 #ifdef _ENABLE_LOG
+<<<<<<< HEAD
 	 //fprintf(stderr,"writing log \n");	
 	 write_log(g_plp, addr, len);
 	 //logsz += len;
+=======
+	 write_log(g_plp, addr, len);
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 #endif
 	pmem_flush_cache_cl(addr, len, flags);
 	__builtin_ia32_sfence();
 	pmem_drain_pm_stores_cl();
+<<<<<<< HEAD
 //#endif
+=======
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 }

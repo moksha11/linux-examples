@@ -1,7 +1,7 @@
 #!/bin/sh
-HOMEDIR=/home/sudarsun/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
 DATADIR=/mnt/pmfs
-NVMDIR=/home/sudarsun/nvmalloc/scripts
+NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 
 sudo rm -rf /mnt/pmfs/*
 

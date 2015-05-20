@@ -17,6 +17,7 @@
 
 #define BUGFIX
 
+<<<<<<< HEAD
 #define MAX_ENTRIES 100*1024*1024
 #define OBJECT_TRACK_SZ 1024*64
 #define MAXPAGELISTSZ 1024*1024*100
@@ -53,6 +54,14 @@ static int migratenow_flag;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t largemutex= PTHREAD_MUTEX_INITIALIZER;
 pthread_t thr;
+=======
+#define MIGRATEFREQ 2
+
+struct timespec spec;
+
+
+pthread_t thr1;
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 
 
 void init_epoch();
@@ -105,17 +114,26 @@ void call_migrate_func()
 
 
 
+<<<<<<< HEAD
 void * entry_point(void *arg)
 {
     printf("starting thread\n");
 	setaff(3);
     call_migrate_func();
+=======
+void * mypoint(void *arg)
+{
+    printf("starting thread\n");
+	//setaff(9);
+    //call_migrate_func();
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
     printf("exiting thread\n");
     return NULL;
 }
 
 void init_epoch() {
 
+<<<<<<< HEAD
 	clock_gettime(CLOCK_REALTIME, &spec);
 
 	if(pthread_create(&thr, NULL, &entry_point, NULL))
@@ -126,6 +144,18 @@ void init_epoch() {
     }
 	
 	init_alloc = 1;
+=======
+	//clock_gettime(CLOCK_REALTIME, &spec);
+
+	if(pthread_create(&thr1, NULL, &mypoint, NULL))
+    {
+        //printf("Could not create thread\n");
+		//pthread_mutex_unlock(&mutex);
+        //assert(0);
+    }
+	
+	//init_alloc = 1;
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 }
 
 

@@ -44,6 +44,7 @@ SUBDIRS = basic\
 	  icount\
 	  trivial\
 	  c-hashtable\
+	btree-1.0\
 	  util
 
 all	: TARGET = all

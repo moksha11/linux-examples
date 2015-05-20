@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOMEDIR=/home/sudarsun/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
 DATADIR=/mnt/pmfs
 NVMDIR=/home/stewart/codes/nvmalloc/scripts
 

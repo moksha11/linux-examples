@@ -148,16 +148,19 @@ tree_insert_subtree(struct tnode **rootp_, const char *s)
 		if ((tnp_ = pmemalloc_reserve(Pmp, sizeof(*tnp_) +
 						slen)) == NULL)
 			FATALSYS("pmem_alloc");
-
-		PMEM(Pmp, tnp_)->left_ =
-		PMEM(Pmp, tnp_)->right_ = NULL;
-		PMEM(Pmp, tnp_)->count = 1;
-		strcpy(PMEM(Pmp, tnp_)->s, s);
 //#ifndef _NODATAPERSIST
 		pmemalloc_onactive(Pmp, tnp_, (void **)rootp_, tnp_);
 		pmemalloc_activate(Pmp, tnp_);
 //#endif
-
+		PMEM(Pmp, tnp_)->left_ =
+		PMEM(Pmp, tnp_)->right_ = NULL;
+		PMEM(Pmp, tnp_)->count = 1;
+		strcpy(PMEM(Pmp, tnp_)->s, s);
+#ifdef _NODATAPERSIST
+		pmem_persist(&PMEM(Pmp, tnp_)->s,slen,_DATAPERSIST);
+#else
+		pmem_persist(&PMEM(Pmp, tnp_)->s,slen, 0);
+#endif
 		//DEBUG("new node inserted, count=1");
 	} else if ((diff = strcmp(s, PMEM(Pmp, *rootp_)->s)) == 0) {
 		/* already in tree, increase count */

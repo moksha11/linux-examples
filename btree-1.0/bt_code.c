@@ -58,12 +58,15 @@ void **root;
 void
 pmem_init(const char *path, size_t size)
 {
+
+	//pmem_fit_mode();
 	//DEBUG("path \"%s\" size %lu", path, size);
 #ifdef INTEL_PMEM
 	if ((Pmp = pmemalloc_init(path, size)) == NULL)
 		printf("pmemalloc_init on %s\n", path);
 
 	root = pmemalloc_static_area(Pmp);
+
 #endif
 }
 
@@ -93,17 +96,25 @@ inline void *pmemalloc_activate_local(void *ptr){
 }
 
 void pmemalloc_free_local(void *ptr){
+<<<<<<< HEAD
 #ifdef _NOPERSIST
 #endif
 	//printf("freeing \n");
+=======
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 	pmemalloc_free(Pmp, ptr);
 }
 #endif
 
 inline void pmem_persist_local(void *src, size_t len, int flags){
+<<<<<<< HEAD
 #ifdef _NOPERSIST
 #endif
 	pmem_persist(src, len,_DATAPERSIST);
+=======
+	//pmem_persist(src, len,_DATAPERSIST);
+	pmem_persist(src, len,flags);
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 }
 
 
@@ -120,8 +131,10 @@ inline void * persist_memmove ( void * destination, const void * source, size_t 
 
 #ifdef _NODATAPERSIST
 		pmem_persist_local(destination, num,_DATAPERSIST);
+		//pmem_persist_local(destination, num,0);
 #else
-		pmem_persist_local(destination, num,_DATAPERSIST);
+		pmem_persist_local(destination, num,0);
+		//pmem_persist_local(destination, num,0);
 #endif
 #endif
   return ptr;

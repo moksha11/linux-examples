@@ -142,10 +142,10 @@ main(int argc, char *argv[])
 	for (i = optind; i < argc; i++)
 		tree_insert_words(argv[i]);
 
-	//tree_walk();
-	fprintf(stdout,"tree_free \n");
-	tree_free();
 
+	//tree_walk();
+	//fprintf(stdout,"tree_free \n");
+	//tree_free();
 
 	exit(0);
 }

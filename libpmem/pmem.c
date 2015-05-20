@@ -37,6 +37,10 @@
 #include <sys/types.h>
 
 #include "pmem.h"
+#include "epoch.h"
+
+//#define _PERSIST
+
 
 /* dispatch tables for the various versions of libpmem */
 void *pmem_map_cl(int fd, size_t len);
@@ -74,7 +78,7 @@ static int Mode = PMEM_CL_INDEX;	/* current libpmem mode */
 void
 pmem_msync_mode(void)
 {
-	Mode = PMEM_MSYNC_INDEX;
+   Mode = PMEM_MSYNC_INDEX;
 }
 
 /*
@@ -94,8 +98,7 @@ pmem_fit_mode(void)
 void *
 pmem_map(int fd, size_t len)
 {
-
-
+    init_epoch();
 	return (*Map[Mode])(fd, len);
 }
 
@@ -110,7 +113,11 @@ pmem_persist(void *addr, size_t len, int flags)
     return;
 #elif _NODATAPERSIST
      if(flags == _DATAPERSIST){
-     	return;
+	    if(!enable_persist()) {
+	      return;
+	     }
+		else {
+		}
      }	
 #endif
 	(*Persist[Mode])(addr, len, flags);
@@ -125,8 +132,13 @@ pmem_flush_cache(void *addr, size_t len, int flags)
 #ifdef _NOPERSIST
     return;
 #elif _NODATAPERSIST
-     if(flags == _DATAPERSIST)
-     return;
+  if(flags == _DATAPERSIST){
+
+      if(!enable_persist()) {
+         return;
+       }else {
+       }
+     }
 #endif
 	(*Flush[Mode])(addr, len, flags);
 }
@@ -140,6 +152,7 @@ pmem_fence(void)
 #ifdef _NOPERSIST
     return;
 #endif
+
 	__builtin_ia32_sfence();
 }
 
@@ -152,5 +165,6 @@ pmem_drain_pm_stores(void)
 #ifdef _NOPERSIST
 	return;
 #endif
+
 	(*Drain_pm_stores[Mode])();
 }

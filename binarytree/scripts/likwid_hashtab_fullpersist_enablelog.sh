@@ -1,7 +1,7 @@
 #!/bin/sh
-HOMEDIR=/home/sudarsun/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
 DATADIR=/mnt/pmfs
-#NVMDIR=/home/sudarsun/nvmalloc/scripts
+#NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 NVMDIR=$NVMALLOC_HOME/scripts
 
 sudo sync
@@ -39,6 +39,7 @@ sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.h
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem.c
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
+<<<<<<< HEAD
 }
 
 
@@ -46,15 +47,39 @@ sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
 EnablePersist_EnableLog
 
 
+=======
+sed -i 's/#define _NOPERSIST/#define _PERSIST/' binarytree/tree.c
+
+
+sed -i 's/#define _STARTEPOCH/#define _STOPEPOCH/' libpmem/epoch.c
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 
 make clean
-make -j4
+cd libpmem
+make clean
+make
+cd ..
+
+cd libpmemalloc
+make clean
+make
+cd ..
+make -j4 > dump.txt
+
+
+
 cd binarytree
+make clean
+make -j4
 
 sudo rm -rf /mnt/pmfs/*
 sudo cp $HOMEDIR/binarytree/*.txt $DATADIR
+<<<<<<< HEAD
 #sudo fallocate -l 2048M /mnt/pmfs/logfile
 
+=======
+sudo fallocate -l 2048M /mnt/pmfs/logfile
+>>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 
 cd $DATADIR
 
