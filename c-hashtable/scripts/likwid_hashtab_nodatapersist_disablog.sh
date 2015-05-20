@@ -1,7 +1,6 @@
 #!/bin/sh
-HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/linux-examples
 DATADIR=/mnt/pmfs
-#NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 NVMDIR=$NVMALLOC_HOME/scripts
 
 sudo sync
@@ -59,11 +58,11 @@ make -j4 > dump.txt
 
 #sed -i 's/_DISABLE_LOG/_ENABLE_LOG/' libpmem/pmem_cl.c
 
+cd c-hashtable
 make clean
 make -j4
-cd c-hashtable
 sudo rm -rf /mnt/pmfs/*
 sudo fallocate -l 2048M /mnt/pmfs/logfile
-sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/c-hashtable/tester 0 $1 0 0 0 0"
+sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/c-hashtable/tester 0 1000000 0 0 0 0"
 
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/linux-examples
 DATADIR=/mnt/pmfs
 #NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 NVMDIR=$NVMALLOC_HOME/scripts
@@ -39,10 +39,7 @@ sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_cl.c
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' libpmem/pmem_fit.c
 sed -i 's/#define _NOPERSIST/#define _PERSIST/' btree-1.0/bt_code.c
 
-<<<<<<< HEAD
-=======
 sed -i 's/#define _STARTEPOCH/#define _STOPEPOCH/' libpmem/epoch.c
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 
 make clean
 cd libpmem
@@ -57,14 +54,10 @@ cd ..
 make -j4 > dump.txt
 
 
-
 cd btree-1.0
 make clean
 make -j4
 sudo rm -rf /mnt/pmfs/*
 #sudo fallocate -l 2048M /mnt/pmfs/logfile
-<<<<<<< HEAD
 sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test 100000"
-=======
-sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test $1"
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
+

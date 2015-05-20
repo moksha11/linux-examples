@@ -37,12 +37,7 @@
 # Makefiles.
 #
 INCS = -I..
-#CFLAGS = -ggdb -Wall -Werror #-D_DELAYFREE
-<<<<<<< HEAD
-CFLAGS = -O2 -Wall -Werror -D_ENABL_DATAPERSIST -D_ENABLE_LOG #-D_DELAYFRE
-=======
-CFLAGS = -O2 -Wall -Werror -D_ENABL_DATAPERSIST #-D_DELAYFRE 
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
+CFLAGS = -O2 -Wall -Werror -D_NODATAPERSIST -D_ENABLE_LOG #-D_DELAYFRE
 STATICLIBS=/usr/lib/libpmemlog.a
 LIBS=-lpmemlog -lpthread $(STATICLIBS)
 

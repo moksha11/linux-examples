@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOMEDIR=/home/sudarsun/libs/intelmachine/libs/linux-examples
+HOMEDIR=/home/sudarsun/libs/linux-examples
 DATADIR=/mnt/pmfs
 #NVMDIR=/home/sudarsun/libs/intelmachine/nvmalloc/scripts
 NVMDIR=$NVMALLOC_HOME/scripts
@@ -66,8 +66,4 @@ make clean
 make -j4
 sudo rm -rf /mnt/pmfs/*
 sudo fallocate -l 2048M /mnt/pmfs/logfile
-<<<<<<< HEAD
 sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test 50000"
-=======
-sudo $NVMDIR/likwid_instrcnt.sh "$HOMEDIR/btree-1.0/test $1"
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911

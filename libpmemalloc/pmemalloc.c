@@ -51,10 +51,6 @@
 
 #define _PERSIST
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 /*
  * hidden bytes added to each allocation.  the metadata we keep for
  * each allocation is 64 bytes in size so when we return the

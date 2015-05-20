@@ -96,25 +96,17 @@ inline void *pmemalloc_activate_local(void *ptr){
 }
 
 void pmemalloc_free_local(void *ptr){
-<<<<<<< HEAD
 #ifdef _NOPERSIST
 #endif
 	//printf("freeing \n");
-=======
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
-	pmemalloc_free(Pmp, ptr);
 }
 #endif
 
 inline void pmem_persist_local(void *src, size_t len, int flags){
-<<<<<<< HEAD
 #ifdef _NOPERSIST
 #endif
-	pmem_persist(src, len,_DATAPERSIST);
-=======
 	//pmem_persist(src, len,_DATAPERSIST);
 	pmem_persist(src, len,flags);
->>>>>>> 020d176e51e0c09895794d71e79013ad23fd2911
 }
 
 
